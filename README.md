@@ -141,10 +141,10 @@ services:
       # - 80:80
       # - 443:443
       # - 8090:8090
-      # - 10080-10085:10080-10085/udp
+      # - 10080-10099:10080-10099/udp
     volumes:
-      - $PWD/data:/data
-      - $PWD/tls:/tls
+      - ./data:/data
+      - ./tls:/tls
     cap_add:
       - NET_ADMIN
     devices:
