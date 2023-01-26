@@ -1,0 +1,120 @@
+{
+    "log": {
+      "level": "trace",
+      "output": "/data/sing-box.log",
+      "timestamp": true
+    },
+    "dns": {
+      "servers": [
+        {
+          "tag": "google-tls",
+          "address": "local",
+          "address_strategy": "prefer_ipv4",
+          "strategy": "ipv4_only",
+          "detour": "direct"
+        },
+        {
+          "tag": "google-udp",
+          "address": "8.8.8.8",
+          "address_strategy": "prefer_ipv4",
+          "strategy": "prefer_ipv4",
+          "detour": "direct"
+        }
+      ],
+      "strategy": "prefer_ipv4"
+    },
+    "inbounds": [
+      {
+        "type": "hysteria",
+        "tag": "hysteria-in",
+        "listen": "0.0.0.0",
+        "listen_port": 10080,
+        "domain_strategy": "ipv4_only",
+        "up_mbps": 50,
+        "down_mbps": 50,
+        "obfs": "nicetofuckyou",
+        "users": [
+          {
+            "name": "<proxy_name>",
+            "auth_str": "<proxy_pwd>"
+          }
+        ],
+        "tls": {
+          "enabled": true,
+          "server_name": "<domain>",
+          "acme": {
+            "domain": "<domain>",
+            "data_directory": "/tls",
+            "default_server_name": "<domain>",
+            "email": "<email>"
+          }
+        }
+      },
+      {
+        "type": "naive",
+        "tag": "naive-in",
+        "listen": "0.0.0.0",
+        "listen_port": 8090,
+        "domain_strategy": "ipv4_only",
+        "users": [
+          {
+            "username": "<proxy_name>",
+            "password": "<proxy_pwd>"
+          }
+        ],
+        "network": "tcp",
+        "tls": {
+          "enabled": true,
+          "server_name": "<domain>",
+          "acme": {
+            "domain": "<domain>",
+            "data_directory": "/tls",
+            "default_server_name": "<domain>",
+            "email": "<email>"
+          }
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "type": "direct",
+        "tag": "direct"
+      },
+      {
+        "type": "block",
+        "tag": "block"
+      },
+      {
+        "type": "dns",
+        "tag": "dns-out"
+      }
+    ],
+    "route": {
+      "geoip": {
+        "path": "/data/geoip.db",
+        "download_url": "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db",
+        "download_detour": "direct"
+      },
+      "geosite": {
+        "path": "/data/geosite.db",
+        "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
+        "download_detour": "direct"
+      },
+      "rules": [
+        {
+          "protocol": "dns",
+          "outbound": "dns-out"
+        },
+        {
+          "geosite": [
+            "cn",
+            "category-ads-all"
+          ],
+          "geoip": "cn",
+          "outbound": "block"
+        }
+      ],
+      "final": "direct",
+      "auto_detect_interface": true
+    }
+  }

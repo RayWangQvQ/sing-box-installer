@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  sing-box:
+    image: ghcr.io/sagernet/sing-box
+    container_name: sing-box
+    restart: unless-stopped
+    network_mode: "host"
+    # ports:
+      # - 80:80
+      # - 443:443
+      # - 8090:8090
+      # - 10080-10085:10080-10085/udp
+    volumes:
+      - $PWD/data:/data
+      - $PWD/tls:/tls
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    entrypoint: ["/bin/bash", "/data/entry.sh"]
