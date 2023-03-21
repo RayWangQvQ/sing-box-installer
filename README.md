@@ -15,11 +15,13 @@ https://github.com/RayWangQvQ/sing-box-installer
     - [1.4. 关于sing-box的配置](#14-关于sing-box的配置)
 - [2. 部署服务端](#2-部署服务端)
     - [2.1. 思路](#21-思路)
-    - [2.2. 文件目录](#22-文件目录)
-    - [2.3. docker compose](#23-docker-compose)
-    - [2.4. entry.sh](#24-entrysh)
-    - [2.5. config.json](#25-configjson)
-    - [2.6. 运行](#26-运行)
+    - [2.2. 一键脚本部署](#22-一键脚本部署)
+    - [2.3. 手动部署](#23-手动部署)
+        - [2.3.1. 文件目录](#231-文件目录)
+        - [2.3.2. docker compose](#232-docker-compose)
+        - [2.3.3. entry.sh](#233-entrysh)
+        - [2.3.4. config.json](#234-configjson)
+        - [2.3.5. 运行](#235-运行)
 - [3. 客户端](#3-客户端)
     - [3.1. 安卓-SagerNet](#31-安卓-sagernet)
         - [3.1.1. hysteria](#311-hysteria)
@@ -105,7 +107,19 @@ systemctl start docker
 systemctl enable docker
 ```
 
-### 2.2. 文件目录
+### 2.2. 一键脚本部署
+
+```
+# create a dir
+mkdir -p ./sing-box && cd ./sing-box
+
+# install
+bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main/install.sh)
+```
+
+### 2.3. 手动部署
+
+#### 2.3.1. 文件目录
 
 需要在服务器构建如下目录结构：
 
@@ -124,7 +138,7 @@ sing-box
 
 tls文件夹用于存储tls证书，`sing-box`可以自动颁发证书，你也可以使用自己现有的证书。如果自动颁发，就空文件夹就行，运行后该目录下会生成证书文件；如果要使用现有证书，可以将证书拷贝到当前文件夹下。
 
-### 2.3. docker compose
+#### 2.3.2. docker compose
 
 `docker-compose.yml`参考内容如下：
 
@@ -164,7 +178,7 @@ sudo ufw disable
 
 如果`host模式`有问题，也可以切换到指定ports模式（注释掉`network_mode`，然后删掉下方prots的注释）
 
-### 2.4. entry.sh
+#### 2.3.3. entry.sh
 
 参考内容如下：
 
@@ -191,7 +205,7 @@ tail -f $logFilePath
 
 会输出`sing-box`版本，检查并格式化配置文件，启动`sing-box`，并追踪日志。
 
-### 2.5. config.json
+#### 2.3.4. config.json
 
 最关键的配置文件，参考内容如下：
 
@@ -308,7 +322,7 @@ tail -f $logFilePath
 
 其他配置可以查阅官方文档了解。
 
-### 2.6. 运行
+#### 2.3.5. 运行
 
 在`docker-compose.yml`同级目录下，执行：
 
