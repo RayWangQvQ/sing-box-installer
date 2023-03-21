@@ -28,12 +28,12 @@ https://github.com/RayWangQvQ/sing-box-installer
         - [3.1.2. naive](#312-naive)
     - [3.2. IOS-小火箭](#32-ios-小火箭)
     - [3.3. Win-Nekoray](#33-win-nekoray)
-    - [3.4. hysteria](#34-hysteria)
-    - [3.5. naive](#35-naive)
-    - [3.6. Win-V2RayN](#36-win-v2rayn)
-        - [3.6.1. hysteria](#361-hysteria)
-        - [3.6.2. naive](#362-naive)
-    - [3.7. Mac-Nekoray](#37-mac-nekoray)
+        - [3.3.1. hysteria](#331-hysteria)
+        - [3.3.2. naive](#332-naive)
+    - [3.4. Win-V2RayN](#34-win-v2rayn)
+        - [3.4.1. hysteria](#341-hysteria)
+        - [3.4.2. naive](#342-naive)
+    - [3.5. Mac-Nekoray](#35-mac-nekoray)
 - [4. FAQ](#4-faq)
     - [4.1. hy的端口hop](#41-hy的端口hop)
 
@@ -387,9 +387,9 @@ docker exec -it sing-box bash
 todo
 
 ### 3.3. Win-Nekoray
-![nekoray](https://github.com/MatsuriDayo/nekoray)
+[nekoray](https://github.com/MatsuriDayo/nekoray)
 
-### 3.4. hysteria
+#### 3.3.1. hysteria
 ![nekoray-hy](doc/pic/nekoray-hysteria.png)
 
 配置文件内容如下：
@@ -397,8 +397,10 @@ todo
 ```
 {
   "server": "127.0.0.1:%mapping_port%",
+  "server_name": "sample.zai7lou.ml",
   "obfs": "Ray",
   "auth_str": "1234@qwer",
+  "alpn": "h2",
   "up_mbps": 100,
   "down_mbps": 100,
   "socks5": {
@@ -409,13 +411,13 @@ todo
 
 里面的占位符（`%mapping_port%`和`%socks_port%`）不要动，`127.0.0.1`也不要动，这个是本地的代理链，不是服务器的ip和端口。
 
-### 3.5. naive
+#### 3.3.2. naive
 
 ![nekeray-naive](doc/pic/nekoray-naive.png)
 
-### 3.6. Win-V2RayN
+### 3.4. Win-V2RayN
 
-#### 3.6.1. hysteria
+#### 3.4.1. hysteria
 
 
 ![hysteria-v2rayn-add.png](https://blog.zai7lou.ml/static/img/ef39f4212a82a7c5dd5637be568fc63d.hysteria-v2rayn-add.png)
@@ -425,8 +427,10 @@ todo
 ```
 {
   "server": "sample.zai7lou.ml:10080",
+  "server_name": "sample.zai7lou.ml",
   "obfs": "Ray",
   "auth_str": "1234@qwer",
+  "alpn": "h2",
   "up_mbps": 100,
   "down_mbps": 100,
   "socks5": {
@@ -438,7 +442,7 @@ todo
 }
 ```
 
-#### 3.6.2. naive
+#### 3.4.2. naive
 
 
 ![naive-v2rayn-add.png](https://blog.zai7lou.ml/static/img/6f5d33a2e5a7129118687948251ac82e.naive-v2rayn-add.png)
@@ -453,7 +457,7 @@ todo
 
 ```
 
-### 3.7. Mac-Nekoray
+### 3.5. Mac-Nekoray
 
 同上，跟windows下的Nekoray一样。
 
