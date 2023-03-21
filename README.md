@@ -202,25 +202,6 @@ tail -f $logFilePath
       "output": "/data/sing-box.log",
       "timestamp": true
     },
-    "dns": {
-      "servers": [
-        {
-          "tag": "google-tls",
-          "address": "local",
-          "address_strategy": "prefer_ipv4",
-          "strategy": "ipv4_only",
-          "detour": "direct"
-        },
-        {
-          "tag": "google-udp",
-          "address": "8.8.8.8",
-          "address_strategy": "prefer_ipv4",
-          "strategy": "prefer_ipv4",
-          "detour": "direct"
-        }
-      ],
-      "strategy": "prefer_ipv4"
-    },
     "inbounds": [
       {
         "type": "hysteria",
@@ -228,8 +209,8 @@ tail -f $logFilePath
         "listen": "0.0.0.0",
         "listen_port": 10080,
         "domain_strategy": "ipv4_only",
-        "up_mbps": 50,
-        "down_mbps": 50,
+        "up_mbps": 100,
+        "down_mbps": 100,
         "obfs": "nicetofuckyou",
         "users": [
           {
@@ -302,14 +283,6 @@ tail -f $logFilePath
         {
           "protocol": "dns",
           "outbound": "dns-out"
-        },
-        {
-          "geosite": [
-            "cn",
-            "category-ads-all"
-          ],
-          "geoip": "cn",
-          "outbound": "block"
         }
       ],
       "final": "direct",
@@ -399,8 +372,8 @@ todo
   "server": "sample.zai7lou.ml:10080",
   "obfs": "Ray",
   "auth_str": "1234@qwer",
-  "up_mbps": 10,
-  "down_mbps": 50,
+  "up_mbps": 100,
+  "down_mbps": 100,
   "socks5": {
     "listen": "127.0.0.1:10808"
   },
