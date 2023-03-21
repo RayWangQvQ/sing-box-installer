@@ -262,8 +262,6 @@ while [ $# -ne 0 ]; do
         email="$1"
         ;;
         shift
-        fakeHost="$1"
-        ;;
     --verbose | -[Vv]erbose)
         verbose=true
         ;;
