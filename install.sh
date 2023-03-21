@@ -261,7 +261,6 @@ while [ $# -ne 0 ]; do
         shift
         email="$1"
         ;;
-        shift
     --verbose | -[Vv]erbose)
         verbose=true
         ;;
