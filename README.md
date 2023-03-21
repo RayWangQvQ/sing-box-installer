@@ -31,7 +31,7 @@ https://github.com/RayWangQvQ/sing-box-installer
         - [3.3.1. hysteria](#331-hysteria)
         - [3.3.2. naive](#332-naive)
 - [4. FAQ](#4-faq)
-    - [4.1. 一键安装脚本在哪](#41-一键安装脚本在哪)
+    - [4.1. hy的端口hop](#41-hy的端口hop)
 
 <!-- /TOC -->
 
@@ -107,6 +107,10 @@ systemctl start docker
 systemctl enable docker
 ```
 
+然后基于docker容器run sing-box的官方镜像，我们只需要配置好配置文件config.json即可。
+
+下面有两种模式：一键脚本部署和手动部署，任选其一即可。
+
 ### 2.2. 一键脚本部署
 
 ```
@@ -116,6 +120,14 @@ mkdir -p ./sing-box && cd ./sing-box
 # install
 bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main/install.sh)
 ```
+
+运行后会让输入参数：
+
+- 域名：需要自己DNS解析好到自己的服务器ip
+- 邮箱：用来申请证书的（会自动申请并更新）
+- proxy用户名：自己设置
+- proxy密码：自己设置
+- obfs：hysteria用来混淆的，相当于密码，自己设置
 
 ### 2.3. 手动部署
 
@@ -414,12 +426,6 @@ todo
 
 ## 4. FAQ
 
-### 4.1. 一键安装脚本在哪
+### 4.1. hy的端口hop
 
-没有写。
-
-`sing-box`的主要工作都在配置`config.json`上，但是用`shell`编辑更新`json`有点鸡肋。
-
-而且当前`sing-box`处于很活跃的开发阶段，我猜测，过不了多久，就会有类似`x-ui`的web管理系统出来。用这种form表单来配置，才是最优方案。
-
-所以，综合考虑下来，当前还是直接编辑json文件来的简单。
+sing-box暂不支持，目前只能多加几个hy节点，然后在客户端做负载均衡。
