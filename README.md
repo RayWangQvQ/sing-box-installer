@@ -27,9 +27,13 @@ https://github.com/RayWangQvQ/sing-box-installer
         - [3.1.1. hysteria](#311-hysteria)
         - [3.1.2. naive](#312-naive)
     - [3.2. IOS-小火箭](#32-ios-小火箭)
-    - [3.3. Win-V2RayN](#33-win-v2rayn)
-        - [3.3.1. hysteria](#331-hysteria)
-        - [3.3.2. naive](#332-naive)
+    - [3.3. Win-Nekoray](#33-win-nekoray)
+    - [3.4. hysteria](#34-hysteria)
+    - [3.5. naive](#35-naive)
+    - [3.6. Win-V2RayN](#36-win-v2rayn)
+        - [3.6.1. hysteria](#361-hysteria)
+        - [3.6.2. naive](#362-naive)
+    - [3.7. Mac-Nekoray](#37-mac-nekoray)
 - [4. FAQ](#4-faq)
     - [4.1. hy的端口hop](#41-hy的端口hop)
 
@@ -43,9 +47,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 `sing-box`是一个开源的**通用代理部署平台**，目的是在当今繁杂的各种代理协议之上，抽象出一个通用接口（interface），来统一各种协议的定义和配置。
 
-做过软件开发的朋友应该都很熟悉一句话：没有什么问题是不能通过加一层来解决的，如果有，就再加一层。
-
-简单理解，`sing-box`就起到这一层的作用，有了它，我可以使用同一套配置规则，部署多个不同的协议。
+有了它，我可以使用同一套配置规则，部署多个不同的协议。
 
 ### 1.2. 关于naiveproxy
 
@@ -82,7 +84,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 部署`sing-box`的关键，就是编写它的配置文件。
 
-`sing-box`抽象出一套配置规则，这套配置规则主要参考了`v2ray`，有DNS，有路由（router），有入站（inbound）和出站（outbound）。
+`sing-box`抽象出一套配置规则，类似`v2ray`，有DNS，有路由（router），有入站（inbound）和出站（outbound）。
 
 如果之前使用过`v2ray`，对这些概念很熟悉，那么你可以很轻松切换到`sing-box`；
 如果你是个新手，完全不了解这些概念，那么我建议你先去读读v2ray的文档（[https://www.v2ray.com](https://www.v2ray.com)）。
@@ -384,9 +386,36 @@ docker exec -it sing-box bash
 ### 3.2. IOS-小火箭
 todo
 
-### 3.3. Win-V2RayN
+### 3.3. Win-Nekoray
+![nekoray](https://github.com/MatsuriDayo/nekoray)
 
-#### 3.3.1. hysteria
+### 3.4. hysteria
+![nekoray-hy](doc/pic/nekoray-hysteria.png)
+
+配置文件内容如下：
+
+```
+{
+  "server": "127.0.0.1:%mapping_port%",
+  "obfs": "Ray",
+  "auth_str": "1234@qwer",
+  "up_mbps": 100,
+  "down_mbps": 100,
+  "socks5": {
+    "listen": "127.0.0.1:%socks_port%"
+  }
+}
+```
+
+里面的占位符（`%mapping_port%`和`%socks_port%`）不要动，`127.0.0.1`也不要动，这个是本地的代理链，不是服务器的ip和端口。
+
+### 3.5. naive
+
+![nekeray-naive](doc/pic/nekoray-naive.png)
+
+### 3.6. Win-V2RayN
+
+#### 3.6.1. hysteria
 
 
 ![hysteria-v2rayn-add.png](https://blog.zai7lou.ml/static/img/ef39f4212a82a7c5dd5637be568fc63d.hysteria-v2rayn-add.png)
@@ -409,7 +438,7 @@ todo
 }
 ```
 
-#### 3.3.2. naive
+#### 3.6.2. naive
 
 
 ![naive-v2rayn-add.png](https://blog.zai7lou.ml/static/img/6f5d33a2e5a7129118687948251ac82e.naive-v2rayn-add.png)
@@ -423,6 +452,10 @@ todo
 }
 
 ```
+
+### 3.7. Mac-Nekoray
+
+同上，跟windows下的Nekoray一样。
 
 ## 4. FAQ
 
