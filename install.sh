@@ -372,7 +372,7 @@ download_data_files() {
     download $gitRowUrl/sing-box/data/entry.sh ./data/entry.sh
 }
 
-# 配置Caddyfile
+# 配置
 replace_configs() {
     eval $invocation
 
@@ -391,7 +391,7 @@ replace_configs() {
     # obfs
     sed -i 's|<obfs>|'"$obfs"'|g' ./data/config.json
 
-    say "Caddyfile:"
+    say "config.json:"
     cat ./data/config.json
 }
 
@@ -441,6 +441,7 @@ check_result() {
         echo "端口：10080"
         echo "混淆密码：$obfs"
         echo "认证荷载：$proxy_pwd"
+        echo "alpn：h2"
         echo ""
         echo "Enjoy it~"
         echo "==============================================="
