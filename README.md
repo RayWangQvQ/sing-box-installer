@@ -237,8 +237,8 @@ tail -f $logFilePath
         "listen": "0.0.0.0",
         "listen_port": 10080,
         "domain_strategy": "ipv4_only",
-        "up_mbps": 100,
-        "down_mbps": 100,
+        "up_mbps": 50,
+        "down_mbps": 50,
         "obfs": "nicetofuckyou",
         "users": [
           {
@@ -398,11 +398,11 @@ todo
 {
   "server": "127.0.0.1:%mapping_port%",
   "server_name": "sample.zai7lou.ml",
-  "obfs": "Ray",
+  "obfs": "nicetofuckyou",
   "auth_str": "1234@qwer",
   "alpn": "h2",
-  "up_mbps": 100,
-  "down_mbps": 100,
+  "up_mbps": 50,
+  "down_mbps": 50,
   "socks5": {
     "listen": "127.0.0.1:%socks_port%"
   }
@@ -410,6 +410,10 @@ todo
 ```
 
 里面的占位符（`%mapping_port%`和`%socks_port%`）不要动，`127.0.0.1`也不要动，这个是本地的代理链，不是服务器的ip和端口。
+
+`server_name`改成自己的域名
+
+`obfs`和`auth_str`改成之前服务端配置的
 
 #### 3.3.2. naive
 
@@ -428,7 +432,7 @@ todo
 {
   "server": "sample.zai7lou.ml:10080",
   "server_name": "sample.zai7lou.ml",
-  "obfs": "Ray",
+  "obfs": "nicetofuckyou",
   "auth_str": "1234@qwer",
   "alpn": "h2",
   "up_mbps": 100,
