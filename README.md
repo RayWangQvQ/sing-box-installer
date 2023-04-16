@@ -17,16 +17,13 @@ https://github.com/RayWangQvQ/sing-box-installer
     - [2.1. 思路](#21-思路)
     - [2.2. 一键脚本部署](#22-一键脚本部署)
     - [2.3. 手动部署](#23-手动部署)
-        - [2.3.1. 文件目录](#231-文件目录)
-        - [2.3.2. docker compose](#232-docker-compose)
-        - [2.3.3. entry.sh](#233-entrysh)
-        - [2.3.4. config.json](#234-configjson)
-        - [2.3.5. 运行](#235-运行)
 - [3. 客户端](#3-客户端)
     - [3.1. 安卓-SagerNet](#31-安卓-sagernet)
         - [3.1.1. hysteria](#311-hysteria)
         - [3.1.2. naive](#312-naive)
     - [3.2. IOS-小火箭](#32-ios-小火箭)
+        - [3.2.1. hysteria](#321-hysteria)
+        - [3.2.2. naiveproxy](#322-naiveproxy)
     - [3.3. Win-Nekoray](#33-win-nekoray)
         - [3.3.1. hysteria](#331-hysteria)
         - [3.3.2. naive](#332-naive)
@@ -60,7 +57,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 ![naiveproxy-bbs-survivor.png](https://blog.zai7lou.ml/static/img/8ff0b7ca66d71028ef059439aa8bafc4.naiveproxy-bbs-survivor.png)
 
-为了解决墙的**主动探测**，它在服务端它使用自己优化过`Caddy`（`forwardproxy`），利用反代，将没有认证的流量转到一个正常的站点（伪装站点）。也就是，你用你的proxy客户端去访问，认证（用户名+密码）能通过，它就给你做代理；你不用客户端用正常浏览器（或用户名密码错误），只要认证不通过，它就给你反代到正常站点，瞒天过海。
+它在服务端它使用自己优化过`Caddy`（`forwardproxy`），利用反代，将没有认证的流量转到一个正常的站点（伪装站点）。也就是，你用你的proxy客户端去访问，认证（用户名+密码）能通过，它就给你做代理；你不用客户端用正常浏览器（或用户名密码错误），只要认证不通过，它就给你反代到正常站点，瞒天过海。
 
 关于TLS指纹问题的讨论，可以看下这个issus：[https://github.com/v2ray/v2ray-core/issues/2098](https://github.com/v2ray/v2ray-core/issues/2098)
 
@@ -89,7 +86,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 如果之前使用过`v2ray`，对这些概念很熟悉，那么你可以很轻松切换到`sing-box`；
 如果你是个新手，完全不了解这些概念，那么我建议你先去读读v2ray的文档（[https://www.v2ray.com](https://www.v2ray.com)）。
 
-因为当前sing-box的文档还处于待完善阶段，只有对各配置字段的解释，并不会告诉你它是什么以及为什么要这么配。
+因为当前sing-box的文档还处于待完善阶段（也可能是故意不想写的太详细），只有对各配置字段的解释，并不会告诉你它是什么以及为什么要这么配。
 
 ## 2. 部署服务端
 
@@ -133,236 +130,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 ### 2.3. 手动部署
 
-#### 2.3.1. 文件目录
-
-需要在服务器构建如下目录结构：
-
-```
-sing-box
-├── data
-    ├── config.json
-    ├── entry.sh
-└── tls
-└── docker-compose.yml
-```
-
-其中，`data/config.json`是`sing-box`的配置文件，所有节点配置信息都在里面。
-
-`data/entry.sh`是容器启动脚本。
-
-tls文件夹用于存储tls证书，`sing-box`可以自动颁发证书，你也可以使用自己现有的证书。如果自动颁发，就空文件夹就行，运行后该目录下会生成证书文件；如果要使用现有证书，可以将证书拷贝到当前文件夹下。
-
-#### 2.3.2. docker compose
-
-`docker-compose.yml`参考内容如下：
-
-```
-version: '3'
-
-services:
-  sing-box:
-    image: ghcr.io/sagernet/sing-box
-    container_name: sing-box
-    restart: unless-stopped
-    network_mode: "host"
-    # ports:
-      # - 80:80
-      # - 443:443
-      # - 8090:8090
-      # - 10080-10099:10080-10099/udp
-    volumes:
-      - ./data:/data
-      - ./tls:/tls
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    entrypoint: ["/bin/bash", "/data/entry.sh"]
-```
-
-其中，网络模式使用了`network_mode: "host"`，直接使用了宿主机的网络环境，需要关闭宿主机的防火墙，命令如下：
-
-```
-# CentOS：
-systemctl disable firewalld
-
-# Debian/Ubuntu：
-sudo ufw disable
-```
-
-如果`host模式`有问题，也可以切换到指定ports模式（注释掉`network_mode`，然后删掉下方prots的注释）
-
-#### 2.3.3. entry.sh
-
-参考内容如下：
-
-```
-#!/bin/bash
-set -e
-
-configFilePath="/data/config.json"
-logFilePath="/data/sing-box.json"
-
-echo "entry"
-sing-box version
-
-# https://sing-box.sagernet.org/configuration/
-echo -e "\nconfig:"
-sing-box check -c $configFilePath || cat $configFilePath
-sing-box format -c /data/config.json -w
-cat $configFilePath
-
-echo -e "\nstarting"
-sing-box run -c $configFilePath
-tail -f $logFilePath
-```
-
-会输出`sing-box`版本，检查并格式化配置文件，启动`sing-box`，并追踪日志。
-
-#### 2.3.4. config.json
-
-最关键的配置文件，参考内容如下：
-
-```
-{
-    "log": {
-      "level": "trace",
-      "output": "/data/sing-box.log",
-      "timestamp": true
-    },
-    "inbounds": [
-      {
-        "type": "hysteria",
-        "tag": "hysteria-in",
-        "listen": "0.0.0.0",
-        "listen_port": 10080,
-        "domain_strategy": "ipv4_only",
-        "up_mbps": 50,
-        "down_mbps": 50,
-        "obfs": "nicetofuckyou",
-        "users": [
-          {
-            "name": "<proxy_name>",
-            "auth_str": "<proxy_pwd>"
-          }
-        ],
-        "tls": {
-          "enabled": true,
-          "server_name": "<domain>",
-          "acme": {
-            "domain": "<domain>",
-            "data_directory": "/tls",
-            "default_server_name": "<domain>",
-            "email": "<email>"
-          }
-        }
-      },
-      {
-        "type": "naive",
-        "tag": "naive-in",
-        "listen": "0.0.0.0",
-        "listen_port": 8090,
-        "domain_strategy": "ipv4_only",
-        "users": [
-          {
-            "username": "<proxy_name>",
-            "password": "<proxy_pwd>"
-          }
-        ],
-        "network": "tcp",
-        "tls": {
-          "enabled": true,
-          "server_name": "<domain>",
-          "acme": {
-            "domain": "<domain>",
-            "data_directory": "/tls",
-            "default_server_name": "<domain>",
-            "email": "<email>"
-          }
-        }
-      }
-    ],
-    "outbounds": [
-      {
-        "type": "direct",
-        "tag": "direct"
-      },
-      {
-        "type": "block",
-        "tag": "block"
-      },
-      {
-        "type": "dns",
-        "tag": "dns-out"
-      }
-    ],
-    "route": {
-      "geoip": {
-        "path": "/data/geoip.db",
-        "download_url": "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db",
-        "download_detour": "direct"
-      },
-      "geosite": {
-        "path": "/data/geosite.db",
-        "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
-        "download_detour": "direct"
-      },
-      "rules": [
-        {
-          "protocol": "dns",
-          "outbound": "dns-out"
-        }
-      ],
-      "final": "direct",
-      "auto_detect_interface": true
-    }
-  }
-  
-```
-
-其中，有几处需要替换的地方：
-
-- `<proxy_name>`替换为代理的用户名，自己取，如`Ray`
-- `<proxy_pwd>`替换为代理的密码，自己取，如`1234@qwer`
-- `<domain>`替换为域名
-- `<email>`替换为邮箱
-- `obfs`是`hysteria`混淆字符串，可以自定义
-
-如上就配置了两个节点，一个**基于udp的10080端口**的`hysteria`节点，一个**基于tcp的8090端口**的`naive`节点。
-
-**如果你的云上有安全策略，请确保这两个端口都开放了。**
-
-证书的话，如果tls目录下没有现有证书，会自动颁发。
-
-其他配置可以查阅官方文档了解。
-
-#### 2.3.5. 运行
-
-在`docker-compose.yml`同级目录下，执行：
-
-```
-docker compose up -d
-```
-
-等待容器启动。
-
-如果一切正常，就是启动成功，可以去使用自己的客户端连接了。（就是这么简单）
-
-*其他参考指令：*
-
-```
-# 查看当前运行中的容器
-docker ps
-
-# 查看容器启动日志
-docker logs sing-box
-
-# 追踪容器运行日志（使用Ctrl C退出追踪）
-docker logs -f sing-box
-
-# 进入容器
-docker exec -it sing-box bash
-```
+[教程](DIY.md)
 
 ## 3. 客户端
 
@@ -384,7 +152,14 @@ docker exec -it sing-box bash
 其中，`密码`是配置中的`password`
 
 ### 3.2. IOS-小火箭
-todo
+
+#### 3.2.1. hysteria
+
+![shadowrocket-hy](doc/pic/shadowrocket-hy.png)
+
+#### 3.2.2. naiveproxy
+
+![shadowrocket-naive](doc/pic/shadowrocket-naive.png)
 
 ### 3.3. Win-Nekoray
 [nekoray](https://github.com/MatsuriDayo/nekoray)
@@ -420,6 +195,8 @@ todo
 ![nekeray-naive](doc/pic/nekoray-naive.png)
 
 ### 3.4. Win-V2RayN
+
+如果你没有必要的理由，请优先选择使用Nekoray。
 
 #### 3.4.1. hysteria
 
