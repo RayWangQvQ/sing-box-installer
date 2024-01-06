@@ -2,7 +2,7 @@
 
 https://github.com/RayWangQvQ/sing-box-installer
 
-基于`sing-box`和`docker`容器化搭建`naiveproxy`和`hysteria`的保姆级教程。
+基于`sing-box`和`docker`容器化搭建`vmess`、`naiveproxy`和`hysteria2`的保姆级教程。
 
 <!-- more -->
 
@@ -19,15 +19,19 @@ https://github.com/RayWangQvQ/sing-box-installer
     - [2.3. 手动部署](#23-手动部署)
 - [3. 客户端](#3-客户端)
     - [3.1. 安卓-SagerNet](#31-安卓-sagernet)
+        - [vmess](#vmess)
         - [3.1.1. hysteria](#311-hysteria)
         - [3.1.2. naive](#312-naive)
     - [3.2. IOS-小火箭](#32-ios-小火箭)
+        - [vmess](#vmess-1)
         - [3.2.1. hysteria](#321-hysteria)
         - [3.2.2. naiveproxy](#322-naiveproxy)
     - [3.3. Win-Nekoray](#33-win-nekoray)
+        - [vmess](#vmess-2)
         - [3.3.1. hysteria](#331-hysteria)
         - [3.3.2. naive](#332-naive)
     - [3.4. Win-V2RayN](#34-win-v2rayn)
+        - [vmess](#vmess-3)
         - [3.4.1. hysteria](#341-hysteria)
         - [3.4.2. naive](#342-naive)
     - [3.5. Mac-Nekoray](#35-mac-nekoray)
@@ -42,9 +46,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 开源地址：[https://github.com/SagerNet/sing-box](https://github.com/SagerNet/sing-box)
 
-`sing-box`是一个开源的**通用代理部署平台**，目的是在当今繁杂的各种代理协议之上，抽象出一个通用接口（interface），来统一各种协议的定义和配置。
-
-有了它，我可以使用同一套配置规则，部署多个不同的协议。
+`sing-box`是一个开源的**通用代理部署平台**，支持大部分协议，有了它，我可以使用同一套配置规则，部署多个不同的协议。
 
 ### 1.2. 关于naiveproxy
 
@@ -67,7 +69,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 开源地址：[https://github.com/apernet/hysteria](https://github.com/apernet/hysteria)
 
-`hysteria`的优势是快，**真的快**。同一台机器，我的测试结果是，比我之前的`xray`快了2到3倍（网上有人测出快了10倍）。
+`hysteria`的优势是快，同一台机器，我的测试结果是，比我之前的`xray`快了2到3倍（网上有人测出快了10倍）。
 
 它是基于`quic`协议，走udp，跟它名字一样（歇斯底里），并发去请求扔包，所以快。
 
@@ -81,12 +83,11 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 部署`sing-box`的关键，就是编写它的配置文件。
 
-`sing-box`抽象出一套配置规则，类似`v2ray`，有DNS，有路由（router），有入站（inbound）和出站（outbound）。
+`sing-box`抽象出一套配置规则，有DNS，有路由（router），有入站（inbound）和出站（outbound）。
 
 如果之前使用过`v2ray`，对这些概念很熟悉，那么你可以很轻松切换到`sing-box`；
-如果你是个新手，完全不了解这些概念，那么我建议你先去读读v2ray的文档（[https://www.v2ray.com](https://www.v2ray.com)）。
 
-因为当前sing-box的文档还处于待完善阶段（也可能是故意不想写的太详细），只有对各配置字段的解释，并不会告诉你它是什么以及为什么要这么配。
+当前sing-box的文档还处于待完善阶段（也可能是故意不想写的太详细），只有对各配置字段的解释，并不会告诉你它是什么以及为什么要这么配。
 
 ## 2. 部署服务端
 
@@ -124,9 +125,9 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 - 域名：需要自己DNS解析好到自己的服务器ip
 - 邮箱：用来申请证书的（会自动申请并更新）
+- proxy uuid: 自己设置，可以随便搜个网站生成
 - proxy用户名：自己设置
 - proxy密码：自己设置
-- obfs：hysteria用来混淆的，相当于密码，自己设置
 
 ### 2.3. 手动部署
 
@@ -135,6 +136,10 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 ## 3. 客户端
 
 ### 3.1. 安卓-SagerNet
+
+#### vmess
+
+略
 
 #### 3.1.1. hysteria
 
@@ -153,6 +158,10 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 ### 3.2. IOS-小火箭
 
+#### vmess
+
+略
+
 #### 3.2.1. hysteria
 
 ![shadowrocket-hy](doc/pic/shadowrocket-hy.png)
@@ -164,31 +173,12 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 ### 3.3. Win-Nekoray
 [nekoray](https://github.com/MatsuriDayo/nekoray)
 
+#### vmess
+
+![nekoray-vmess](doc/pic/nekoray-vmess.png)
+
 #### 3.3.1. hysteria
 ![nekoray-hy](doc/pic/nekoray-hysteria.png)
-
-配置文件内容如下：
-
-```
-{
-  "server": "127.0.0.1:%mapping_port%",
-  "server_name": "sample.zai7lou.ml",
-  "obfs": "nicetofuckyou",
-  "auth_str": "1234@qwer",
-  "alpn": "h2",
-  "up_mbps": 50,
-  "down_mbps": 50,
-  "socks5": {
-    "listen": "127.0.0.1:%socks_port%"
-  }
-}
-```
-
-里面的占位符（`%mapping_port%`和`%socks_port%`）不要动，`127.0.0.1`也不要动，这个是本地的代理链，不是服务器的ip和端口。
-
-`server_name`改成自己的域名
-
-`obfs`和`auth_str`改成之前服务端配置的
 
 #### 3.3.2. naive
 
@@ -197,6 +187,10 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 ### 3.4. Win-V2RayN
 
 如果你没有必要的理由，请优先选择使用Nekoray。
+
+#### vmess
+
+略
 
 #### 3.4.1. hysteria
 

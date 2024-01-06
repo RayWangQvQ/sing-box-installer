@@ -45,6 +45,7 @@ services:
     # ports:
       # - 80:80
       # - 443:443
+      # - 8080:8080
       # - 8090:8090
       # - 10080-10099:10080-10099/udp
     volumes:
@@ -109,23 +110,42 @@ tail -f $logFilePath
     },
     "inbounds": [
       {
-        "type": "hysteria",
-        "tag": "hysteria-in",
+        "type": "vmess",
+        "tag": "vmess-in",
         "listen": "0.0.0.0",
-        "listen_port": 10080,
-        "domain_strategy": "ipv4_only",
-        "up_mbps": 50,
-        "down_mbps": 50,
-        "obfs": "nicetofuckyou",
+        "listen_port": 8080,
         "users": [
           {
             "name": "<proxy_name>",
-            "auth_str": "<proxy_pwd>"
+            "uuid": "<proxy_uuid>"
+          }
+        ],
+        "multiplex": {
+          "enabled": true
+        },
+        "transport": {
+          "type": "ws",
+          "path": "/download",
+          "headers": {
+            "Host": "download.windowsupdate.com"
+          }
+        }
+      },
+      {
+        "type": "hysteria2",
+        "tag": "hy2-in",
+        "listen": "0.0.0.0",
+        "listen_port": 10080,
+        "users": [
+          {
+            "name": "<proxy_name>",
+            "password": "<proxy_pwd>"
           }
         ],
         "tls": {
           "enabled": true,
           "server_name": "<domain>",
+          "alpn": ["h3","h2","http/1.1"],
           "acme": {
             "domain": "<domain>",
             "data_directory": "/tls",
@@ -158,56 +178,21 @@ tail -f $logFilePath
           }
         }
       }
-    ],
-    "outbounds": [
-      {
-        "type": "direct",
-        "tag": "direct"
-      },
-      {
-        "type": "block",
-        "tag": "block"
-      },
-      {
-        "type": "dns",
-        "tag": "dns-out"
-      }
-    ],
-    "route": {
-      "geoip": {
-        "path": "/data/geoip.db",
-        "download_url": "https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db",
-        "download_detour": "direct"
-      },
-      "geosite": {
-        "path": "/data/geosite.db",
-        "download_url": "https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db",
-        "download_detour": "direct"
-      },
-      "rules": [
-        {
-          "protocol": "dns",
-          "outbound": "dns-out"
-        }
-      ],
-      "final": "direct",
-      "auto_detect_interface": true
-    }
+    ]
   }
-  
 ```
 
 其中，有几处需要替换的地方：
 
+- `<proxy_uuid>`替换为代理的uuid，自己取，可以找网站在线生成
 - `<proxy_name>`替换为代理的用户名，自己取，如`Ray`
 - `<proxy_pwd>`替换为代理的密码，自己取，如`1234@qwer`
 - `<domain>`替换为域名
 - `<email>`替换为邮箱
-- `obfs`是`hysteria`混淆字符串，可以自定义
 
-如上就配置了两个节点，一个**基于udp的10080端口**的`hysteria`节点，一个**基于tcp的8090端口**的`naive`节点。
+如上就配置了三个节点，一个8080端口的vmess+ws节点，一个**基于udp的10080端口**的`hysteria2`节点，一个**基于tcp的8090端口**的`naive`节点。
 
-**如果你的云上有安全策略，请确保这两个端口都开放了。**
+**如果你的云上有安全策略，请确保这几个端口都开放了。**
 
 证书的话，如果tls目录下没有现有证书，会自动颁发。
 

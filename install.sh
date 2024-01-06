@@ -227,9 +227,9 @@ echo '             |___/                 |___/  '
 # ------------vars-----------、
 gitRowUrl="https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main"
 
+proxy_uuid=""
 proxy_name=""
 proxy_pwd=""
-obfs=""
 
 domain=""
 email=""
@@ -241,6 +241,10 @@ verbose=false
 while [ $# -ne 0 ]; do
     name="$1"
     case "$name" in
+    -u | --proxy-uuid | -[Pp]roxy[Uu]uid)
+        shift
+        proxy_uuid="$1"
+        ;;
     -n | --proxy-name | -[Pp]roxy[Nn]ame)
         shift
         proxy_name="$1"
@@ -248,10 +252,6 @@ while [ $# -ne 0 ]; do
     -p | --proxy-pwd | -[Pp]roxy[Pp]wd)
         shift
         proxy_pwd="$1"
-        ;;
-    -o | --obfs | -[Oo]bfs)
-        shift
-        obfs="$1"
         ;;
     -d | --domain | -[Dd]omain)
         shift
@@ -322,6 +322,13 @@ read_var_from_user() {
         say "邮箱: $email"
     fi
 
+    # proxy uuid
+    if [ -z "$proxy_uuid" ]; then
+        read -p "请输入节点uuid(如c2cd9b44-e92f-80a6-b5ae-43c8cd37f476):" proxy_uuid
+    else
+        say "节点uuid: $proxy_uuid"
+    fi
+
     # proxy用户名
     if [ -z "$proxy_name" ]; then
         read -p "请输入节点用户名(如ray):" proxy_name
@@ -334,13 +341,6 @@ read_var_from_user() {
         read -p "请输入节点密码(如1qaz@wsx):" proxy_pwd
     else
         say "节点密码: $proxy_pwd"
-    fi
-
-    # obfs
-    if [ -z "$obfs" ]; then
-        read -p "请输入混淆字符串(如ray):" obfs
-    else
-        say "混淆字符串: $obfs"
     fi
 }
 
@@ -382,14 +382,14 @@ replace_configs() {
     # replace mail
     sed -i 's|<email>|'"$email"'|g' ./data/config.json
 
+    # proxy_uuid
+    sed -i 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json
+
     # proxy_name
     sed -i 's|<proxy_name>|'"$proxy_name"'|g' ./data/config.json
 
     # proxy_pwd
     sed -i 's|<proxy_pwd>|'"$proxy_pwd"'|g' ./data/config.json
-
-    # obfs
-    sed -i 's|<obfs>|'"$obfs"'|g' ./data/config.json
 
     say "config.json:"
     cat ./data/config.json
@@ -433,15 +433,25 @@ check_result() {
         echo "请使用客户端尝试连接你的节点进行测试"
         echo "如果异常，请运行'docker logs -f sing-box'来追踪容器运行日志, 随后可以点击 Ctrl+c 退出日志追踪"
         echo ""
+        echo "vmess节点如下："
+        echo "服务器：$domain"
+        echo "端口：8080"
+        echo "UUID：$proxy_uuid"
+        echo "Alter Id：0"
+        echo "传输：ws"
+        echo "Path：/download"
+        echo "Host：download.windowsupdate.com"
+        echo ""
+        echo ""
         echo "naive节点如下："
         echo "naive+https://$proxy_name:$proxy_pwd@$domain:8090#naive"
         echo ""
-        echo "hysteria节点如下："
+        echo "hysteria2节点如下："
         echo "服务器：$domain"
         echo "端口：10080"
-        echo "混淆密码：$obfs"
-        echo "认证荷载：$proxy_pwd"
-        echo "alpn：h2"
+        echo "密码：$proxy_pwd"
+        echo "SNI：$domain"
+        echo "alpn：h3"
         echo ""
         echo "Enjoy it~"
         echo "==============================================="
