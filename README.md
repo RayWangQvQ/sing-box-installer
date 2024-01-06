@@ -57,7 +57,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 `naiveproxy`据说是当前最安全的协议**之一**，了解到它还是去年（2022年）10月份那次大规模封禁，据说除了`naiveproxy`幸免，其他协议均有死伤（包括`trojan`，`Xray`，`V2Ray TLS+Websocket`，`VLESS`和`gRPC`），详细可查看issue：[https://github.com/net4people/bbs/issues/129](https://github.com/net4people/bbs/issues/129)
 
 
-![naiveproxy-bbs-survivor.png](https://blog.zai7lou.ml/static/img/8ff0b7ca66d71028ef059439aa8bafc4.naiveproxy-bbs-survivor.png)
+![naiveproxy-bbs-survivor.png](https://996icu.free.hr/static/img/8ff0b7ca66d71028ef059439aa8bafc4.naiveproxy-bbs-survivor.png)
 
 它在服务端它使用自己优化过`Caddy`（`forwardproxy`），利用反代，将没有认证的流量转到一个正常的站点（伪装站点）。也就是，你用你的proxy客户端去访问，认证（用户名+密码）能通过，它就给你做代理；你不用客户端用正常浏览器（或用户名密码错误），只要认证不通过，它就给你反代到正常站点，瞒天过海。
 
