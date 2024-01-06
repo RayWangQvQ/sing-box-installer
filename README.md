@@ -143,7 +143,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 #### 3.1.1. hysteria
 
-![sing-box-client-sagernet-hysteria.jpg](https://blog.zai7lou.ml/static/img/87514a662f253ae2a12d2e2b98441ae5.sing-box-client-sagernet-hysteria.jpg)
+![sing-box-client-sagernet-hysteria.jpg](https://996icu.free.hr/static/img/87514a662f253ae2a12d2e2b98441ae5.sing-box-client-sagernet-hysteria.jpg)
 
 其中：
 
@@ -152,7 +152,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 #### 3.1.2. naive
 
-![sing-box-client-sagernet-naive.jpg](https://blog.zai7lou.ml/static/img/a65503bf1d71255a3ff3d0eebff9435f.sing-box-client-sagernet-naive.jpg)
+![sing-box-client-sagernet-naive.jpg](https://996icu.free.hr/static/img/a65503bf1d71255a3ff3d0eebff9435f.sing-box-client-sagernet-naive.jpg)
 
 其中，`密码`是配置中的`password`
 
@@ -195,7 +195,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 #### 3.4.1. hysteria
 
 
-![hysteria-v2rayn-add.png](https://blog.zai7lou.ml/static/img/ef39f4212a82a7c5dd5637be568fc63d.hysteria-v2rayn-add.png)
+![hysteria-v2rayn-add.png](https://996icu.free.hr/static/img/ef39f4212a82a7c5dd5637be568fc63d.hysteria-v2rayn-add.png)
 
 配置文件内容如下：
 
@@ -220,7 +220,7 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 #### 3.4.2. naive
 
 
-![naive-v2rayn-add.png](https://blog.zai7lou.ml/static/img/6f5d33a2e5a7129118687948251ac82e.naive-v2rayn-add.png)
+![naive-v2rayn-add.png](https://996icu.free.hr/static/img/6f5d33a2e5a7129118687948251ac82e.naive-v2rayn-add.png)
 
 配置文件内容如下：
 
