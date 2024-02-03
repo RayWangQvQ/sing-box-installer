@@ -399,6 +399,9 @@ replace_configs() {
 runContainer() {
     eval $invocation
 
+    say "Pull the latest img"
+    docker pull ghcr.io/sagernet/sing-box
+
     say "Try to run docker container:"
     {
         docker compose version && docker compose up -d
