@@ -40,6 +40,14 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 <!-- /TOC -->
 
+```
+# create a dir
+mkdir -p ./sing-box && cd ./sing-box
+
+# install
+bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main/install.sh)
+```
+
 ## 1. 大概介绍下
 
 ### 1.1. 关于sing-box
@@ -54,24 +62,13 @@ https://github.com/RayWangQvQ/sing-box-installer
 - 服务端：[https://github.com/klzgrad/forwardproxy](https://github.com/klzgrad/forwardproxy)
 - 客户端：[https://github.com/klzgrad/naiveproxy](https://github.com/klzgrad/naiveproxy)
 
-`naiveproxy`据说是当前最安全的协议**之一**，了解到它还是去年（2022年）10月份那次大规模封禁，据说除了`naiveproxy`幸免，其他协议均有死伤（包括`trojan`，`Xray`，`V2Ray TLS+Websocket`，`VLESS`和`gRPC`），详细可查看issue：[https://github.com/net4people/bbs/issues/129](https://github.com/net4people/bbs/issues/129)
-
-
-![naiveproxy-bbs-survivor.png](https://996icu.free.hr/static/img/8ff0b7ca66d71028ef059439aa8bafc4.naiveproxy-bbs-survivor.png)
-
-它在服务端它使用自己优化过`Caddy`（`forwardproxy`），利用反代，将没有认证的流量转到一个正常的站点（伪装站点）。也就是，你用你的proxy客户端去访问，认证（用户名+密码）能通过，它就给你做代理；你不用客户端用正常浏览器（或用户名密码错误），只要认证不通过，它就给你反代到正常站点，瞒天过海。
-
-关于TLS指纹问题的讨论，可以看下这个issus：[https://github.com/v2ray/v2ray-core/issues/2098](https://github.com/v2ray/v2ray-core/issues/2098)
-
-在issue里顺便也了解到，`naiveproxy`的作者原来也是`trojan`最初的几个作者之一，后来`trojan`有些设计上的争议，包括一些优化的想法，由于主程没时间，无法得到实施，于是`naiveproxy`的作者就自己开了个项目来实现这些想法，这个项目就是现在的`naiveproxy`。
+据说是当前最安全的协议**之一**
 
 ### 1.3. 关于hysteria
 
 开源地址：[https://github.com/apernet/hysteria](https://github.com/apernet/hysteria)
 
-`hysteria`的优势是快，同一台机器，我的测试结果是，比我之前的`xray`快了2到3倍（网上有人测出快了10倍）。
-
-它是基于`quic`协议，走udp，跟它名字一样（歇斯底里），并发去请求扔包，所以快。
+`hysteria`的优势是快，基于`quic`协议，走udp，跟它名字一样（歇斯底里），并发去请求扔包，所以快。
 
 已知问题是qos，来自服务商的限制，当请求流量过大时，会被限速、断流。以前看有图比是嫌清晰度不够，用了`hysteria`可能要反过来主动去自己调低清晰度了。
 
