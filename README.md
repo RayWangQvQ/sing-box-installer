@@ -40,7 +40,12 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 <!-- /TOC -->
 
+省流，可以直接执行：
+
 ```
+# get permission
+sudo -i
+
 # create a dir
 mkdir -p ./sing-box && cd ./sing-box
 
@@ -111,6 +116,9 @@ systemctl enable docker
 ### 2.2. 一键脚本部署
 
 ```
+# get permission
+sudo -i
+
 # create a dir
 mkdir -p ./sing-box && cd ./sing-box
 
