@@ -388,17 +388,17 @@ read_var_from_user() {
 
     # 端口
     if [ -z "$port_vmess" ]; then
-        read -p "vmess端口(如8080，需防火墙放行tcp流量):" port_vmess
+        read -p "vmess端口(如8080，需防火墙放行该端口tcp流量):" port_vmess
     else
         say "vmess端口: $port_vmess"
     fi
     if [ -z "$port_naive" ]; then
-        read -p "naive端口(如8080，需防火墙放行udp流量):" port_naive
+        read -p "naive端口(如8090，需防火墙放行该端口tcp流量):" port_naive
     else
         say "naive端口: $port_naive"
     fi
     if [ -z "$port_hy2" ]; then
-        read -p "hysteria2端口(如8080，需防火墙放行udp流量):" port_hy2
+        read -p "hysteria2端口(如10080，需防火墙放行该端口udp流量):" port_hy2
     else
         say "hysteria2端口: $port_hy2"
     fi

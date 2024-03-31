@@ -11,7 +11,7 @@ services:
       - 443:443
       - <port_vmess>:8080
       - <port_naive>:8090
-      - <port_hy2>:10080-10085/udp
+      - <port_hy2>:10080/udp
     volumes:
       - ./data:/data
       - ./tls:/tls
