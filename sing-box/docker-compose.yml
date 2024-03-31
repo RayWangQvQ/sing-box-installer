@@ -9,9 +9,9 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
-      - 8090:8090
-      - 10080-10085:10080-10085/udp
+      - <port_vmess>:8080
+      - <port_naive>:8090
+      - <port_hy2>:10080-10085/udp
     volumes:
       - ./data:/data
       - ./tls:/tls

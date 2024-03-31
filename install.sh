@@ -237,6 +237,10 @@ cert_path=""
 cert_private_key_path=""
 email=""
 
+port_vmess=""
+port_naive=""
+port_hy2=""
+
 verbose=false
 # --------------------------
 
@@ -381,6 +385,23 @@ read_var_from_user() {
     else
         say "节点密码: $proxy_pwd"
     fi
+
+    # 端口
+    if [ -z "$port_vmess" ]; then
+        read -p "vmess端口(如8080，需防火墙放行tcp流量):" port_vmess
+    else
+        say "vmess端口: $port_vmess"
+    fi
+    if [ -z "$port_naive" ]; then
+        read -p "naive端口(如8080，需防火墙放行udp流量):" port_naive
+    else
+        say "naive端口: $port_naive"
+    fi
+    if [ -z "$port_hy2" ]; then
+        read -p "hysteria2端口(如8080，需防火墙放行udp流量):" port_hy2
+    else
+        say "hysteria2端口: $port_hy2"
+    fi
 }
 
 # 下载docker-compose文件
@@ -399,8 +420,13 @@ download_docker_compose_file() {
 replace_docker_compose_configs() {
     eval $invocation
 
+    # cert
     sed -i 's|<cert_path>|'"$cert_path"'|g' ./docker-compose.yml
     sed -i 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./docker-compose.yml
+
+    sed -i 's|<port_vmess>|'"$port_vmess"'|g' ./docker-compose.yml
+    sed -i 's|<port_naive>|'"$port_naive"'|g' ./docker-compose.yml
+    sed -i 's|<port_hy2>|'"$port_hy2"'|g' ./docker-compose.yml
 }
 
 # 下载data
