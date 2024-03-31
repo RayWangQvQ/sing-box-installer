@@ -1,0 +1,61 @@
+{
+    "log": {
+      "level": "trace",
+      "output": "/data/sing-box.log",
+      "timestamp": true
+    },
+    "inbounds": [
+      {
+        "type": "vmess",
+        "tag": "vmess-in",
+        "listen": "0.0.0.0",
+        "listen_port": 8080,
+        "users": [
+          {
+            "name": "<proxy_name>",
+            "uuid": "<proxy_uuid>"
+          }
+        ],
+        "multiplex": {
+          "enabled": true
+        },
+        "transport": {
+          "type": "ws",
+          "path": "/download",
+          "headers": {
+            "Host": "download.windowsupdate.com"
+          }
+        }
+      },
+      {
+        "type": "hysteria2",
+        "tag": "hy2-in",
+        "listen": "0.0.0.0",
+        "listen_port": 10080,
+        "users": [
+          {
+            "name": "<proxy_name>",
+            "password": "<proxy_pwd>"
+          }
+        ],
+        "certificate_path": "<cert_path>",
+        "key_path": "<cert_private_key_path>"
+      },
+      {
+        "type": "naive",
+        "tag": "naive-in",
+        "listen": "0.0.0.0",
+        "listen_port": 8090,
+        "domain_strategy": "ipv4_only",
+        "users": [
+          {
+            "username": "<proxy_name>",
+            "password": "<proxy_pwd>"
+          }
+        ],
+        "network": "tcp",
+        "certificate_path": "<cert_path>",
+        "key_path": "<cert_private_key_path>"
+      }
+    ]
+  }

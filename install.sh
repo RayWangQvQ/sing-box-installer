@@ -232,6 +232,9 @@ proxy_name=""
 proxy_pwd=""
 
 domain=""
+cert_choice=""
+cert_path=""
+cert_private_key_path=""
 email=""
 
 verbose=false
@@ -260,6 +263,14 @@ while [ $# -ne 0 ]; do
     -m | --mail | -[Mm]ail)
         shift
         email="$1"
+        ;;
+    -c | --cert-path | -[Cc]ert[Pp]ath)
+        shift
+        cert_path="$1"
+        ;;
+    -k | --cert-private-key-path | -[Cc]ert[Pp]rivate[Kk]ey[Pp]ath)
+        shift
+        cert_private_key_path="$1"
         ;;
     --verbose | -[Vv]erbose)
         verbose=true
@@ -310,16 +321,44 @@ read_var_from_user() {
 
     # host
     if [ -z "$domain" ]; then
+        echo "节点需要一个域名，请提供一个域名，且确保该域名已DNS到服务器ip："
         read -p "请输入域名(如demo.test.tk):" domain
     else
         say "域名: $domain"
     fi
 
-    # email
-    if [ -z "$email" ]; then
-        read -p "请输入邮箱(如test@qq.com):" email
+    # cert file
+    if [ -z "$cert_path" ]; then
+        echo "请选择域名证书的颁发方式："
+        echo "1. 由sing-box自动颁发（需要占用80端口）"
+        echo "2. 自己提供证书文件"
+        read -p "请输入选项（1或2）: " cert_choice
+
+        case $cert_choice in
+        1)
+            echo "您选择了由sing-box自动颁发证书"
+            echo "这需要占用80端口，请确保该端口未被占用，且防火墙规则已放行"
+            # email
+            if [ -z "$email" ]; then
+                read -p "请输入邮箱(如test@qq.com):" email
+            else
+                say "邮箱: $email"
+            fi
+            ;;
+        2)
+            echo "您选择了自己提供证书。"
+            read -p "请输入pem格式的证书的绝对路径（如：/tls/fullchain.pem）: " cert_path
+            read -p "请输入pem格式的私钥的绝对路径（如：/tls/privkey.pem）: " cert_private_key_path
+            # 在这里加入使用用户提供的证书的相关命令
+            ;;
+
+        *)
+            echo "无效的选项，请输入1或2。"
+            ;;
+        esac
     else
-        say "邮箱: $email"
+        say "证书路径: $cert_path"
+        say "私钥路径: $cert_private_key_path"
     fi
 
     # proxy uuid
@@ -349,12 +388,19 @@ download_docker_compose_file() {
     eval $invocation
 
     rm -rf ./docker-compose.yml
-    download $gitRowUrl/sing-box/docker-compose.yml docker-compose.yml
+    if [ "$cert_choice" = "1" ]; then
+        download $gitRowUrl/sing-box/docker-compose.yml docker-compose.yml
+    else
+        download $gitRowUrl/sing-box/docker-compose-cert.yml docker-compose.yml
+    fi
 }
 
 # 配置docker-compose文件
 replace_docker_compose_configs() {
     eval $invocation
+
+    sed -i 's|<cert_path>|'"$cert_path"'|g' ./docker-compose.yml
+    sed -i 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./docker-compose.yml
 }
 
 # 下载data
@@ -365,7 +411,11 @@ download_data_files() {
 
     # config.json
     rm -rf ./data/config.json
-    download $gitRowUrl/sing-box/data/config.json ./data/config.json
+    if [ "$cert_choice" = "1" ]; then
+        download $gitRowUrl/sing-box/data/config.json ./data/config.json
+    else
+        download $gitRowUrl/sing-box/data/config_cert.json ./data/config.json
+    fi
 
     # entry.sh
     rm -rf ./data/entry.sh
@@ -378,6 +428,10 @@ replace_configs() {
 
     # replace domain
     sed -i 's|<domain>|'"$domain"'|g' ./data/config.json
+
+    # certs
+    sed -i 's|<cert_path>|'"$cert_path"'|g' ./data/config.json
+    sed -i 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./data/config.json
 
     # replace mail
     sed -i 's|<email>|'"$email"'|g' ./data/config.json
@@ -409,14 +463,14 @@ runContainer() {
         docker-compose version && docker-compose up -d
     } || {
         docker run -itd --name sing-box \
-        --restart=unless-stopped \
-        -p 80:80 \
-        -p 443:443 \
-        -p 8090:8090 \
-        -p 10080-10085:10080-10085/udp \
-        -v $PWD/data:/data \
-        -v $PWD/tls:/tls \
-        ghcr.io/sagernet/sing-box bash /data/entry.sh
+            --restart=unless-stopped \
+            -p 80:80 \
+            -p 443:443 \
+            -p 8090:8090 \
+            -p 10080-10085:10080-10085/udp \
+            -v $PWD/data:/data \
+            -v $PWD/tls:/tls \
+            ghcr.io/sagernet/sing-box bash /data/entry.sh
     }
 }
 
