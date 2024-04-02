@@ -38,8 +38,13 @@
             "password": "<proxy_pwd>"
           }
         ],
-        "certificate_path": "<cert_path>",
-        "key_path": "<cert_private_key_path>"
+        "tls": {
+          "enabled": true,
+          "server_name": "<domain>",
+          "alpn": ["h3","h2","http/1.1"],
+          "certificate_path": "<cert_path>",
+          "key_path": "<cert_private_key_path>"
+        }
       },
       {
         "type": "naive",
@@ -54,8 +59,13 @@
           }
         ],
         "network": "tcp",
-        "certificate_path": "<cert_path>",
-        "key_path": "<cert_private_key_path>"
+        "tls": {
+          "enabled": true,
+          "server_name": "<domain>",
+          "alpn": ["h3","h2","http/1.1"],
+          "certificate_path": "<cert_path>",
+          "key_path": "<cert_private_key_path>"
+        }
       }
     ]
   }
