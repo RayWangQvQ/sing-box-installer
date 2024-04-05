@@ -15,5 +15,4 @@ cat $configFilePath
 
 echo -e "\nstarting"
 touch $logFilePath
-tail -f $logFilePath &
-sing-box run -c $configFilePath
+sing-box run -c $configFilePath 2>&1 | tee -a $logFilePath
