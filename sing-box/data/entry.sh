@@ -14,5 +14,6 @@ sing-box format -c /data/config.json -w
 cat $configFilePath
 
 echo -e "\nstarting"
+touch $logFilePath
+tail -f $logFilePath &
 sing-box run -c $configFilePath
-tail -f $logFilePath
