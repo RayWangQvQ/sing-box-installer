@@ -2,7 +2,7 @@
 set -e
 
 configFilePath="/data/config.json"
-logFilePath="/data/sing-box.json"
+logFilePath="/data/sing-box.log"
 
 echo "entry"
 sing-box version
