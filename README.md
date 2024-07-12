@@ -42,6 +42,7 @@ https://github.com/RayWangQvQ/sing-box-installer
 
 省流，可以直接执行：
 
+基于docker，需要root：
 ```
 # get permission
 sudo -i
@@ -51,6 +52,13 @@ mkdir -p ./sing-box && cd ./sing-box
 
 # install
 bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main/install.sh)
+```
+
+serv00：
+```
+# create a dir
+mkdir -p ./sing-box && cd ./sing-box
+bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main/install-serv00.sh)
 ```
 
 ## 1. 大概介绍下

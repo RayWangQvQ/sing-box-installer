@@ -393,12 +393,15 @@ read_var_from_user() {
     fi
 }
 
-download_sing-box_binary(){
+download_sing-box_binary() {
     eval $invocation
+
+    say "installing"
 
     download https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg ./sing-box-1.9.3.pkg
     tar -xvf sing-box-1.9.3.pkg
 
+    say "check sing-box"
     export PATH="$PATH:$PWD/usr/local/bin"
     sing-box version
 }
@@ -411,11 +414,7 @@ download_data_files() {
 
     # config.json
     rm -rf ./data/config.json
-    if [ "$cert_choice" = "1" ]; then
-        download $gitRowUrl/sing-box/data/config.json ./data/config.json
-    else
-        download $gitRowUrl/sing-box/data/config_cert.json ./data/config.json
-    fi
+    download $gitRowUrl/sing-box/data/config_serv00.json ./data/config.json
 
     # entry.sh
     rm -rf ./data/entry.sh
@@ -427,29 +426,29 @@ replace_configs() {
     eval $invocation
 
     # replace domain
-    sed 's|<domain>|'"$domain"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<domain>|'"$domain"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # certs
-    sed 's|<cert_path>|'"$cert_path"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<cert_path>|'"$cert_path"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
-    sed 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # replace mail
-    sed 's|<email>|'"$email"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<email>|'"$email"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # proxy_uuid
-    sed 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # proxy_name
-    sed 's|<proxy_name>|'"$proxy_name"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<proxy_name>|'"$proxy_name"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # proxy_pwd
-    sed 's|<proxy_pwd>|'"$proxy_pwd"'|g' ./data/config.json > ./data/config.json.new
+    sed 's|<proxy_pwd>|'"$proxy_pwd"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     say "config.json:"
@@ -460,7 +459,7 @@ replace_configs() {
 run() {
     eval $invocation
 
-    ./data/entry.sh $PWD/data
+    chmod +x ./data/entry.sh && ./data/entry.sh $PWD/data
 }
 
 # 检查容器运行状态
