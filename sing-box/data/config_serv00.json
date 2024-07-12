@@ -25,27 +25,6 @@
             "Host": "download.windowsupdate.com"
           }
         }
-      },
-      {
-        "type": "naive",
-        "tag": "naive-in",
-        "listen": "0.0.0.0",
-        "listen_port": 8090,
-        "domain_strategy": "ipv4_only",
-        "users": [
-          {
-            "username": "<proxy_name>",
-            "password": "<proxy_pwd>"
-          }
-        ],
-        "network": "tcp",
-        "tls": {
-          "enabled": true,
-          "server_name": "<domain>",
-          "alpn": ["h3","h2","http/1.1"],
-          "certificate_path": "<cert_path>",
-          "key_path": "<cert_private_key_path>"
-        }
       }
     ]
   }
