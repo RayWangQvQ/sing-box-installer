@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-configFilePath="/data/config.json"
-logFilePath="/data/sing-box.log"
+dir_data=$1
+
+configFilePath="$dir_data/config.json"
+logFilePath="$dir_data/sing-box.log"
 
 echo "entry"
 sing-box version
@@ -10,7 +12,7 @@ sing-box version
 # https://sing-box.sagernet.org/configuration/
 echo -e "\nconfig:"
 sing-box check -c $configFilePath || cat $configFilePath
-sing-box format -c /data/config.json -w
+sing-box format -c $configFilePath -w
 cat $configFilePath
 
 echo -e "\nstarting"

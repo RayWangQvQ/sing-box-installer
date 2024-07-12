@@ -18,4 +18,4 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun
-    entrypoint: ["/bin/bash", "/data/entry.sh"]
+    entrypoint: ["/bin/bash", "/data/entry.sh /data"]
