@@ -320,40 +320,6 @@ read_var_from_user() {
         say "域名: $domain"
     fi
 
-    # cert file
-    if [ -z "$cert_path" ]; then
-        echo "请选择域名证书的颁发方式："
-        echo "1. 由sing-box自动颁发（需要占用80端口）"
-        echo "2. 自己提供证书文件"
-        read -p "请输入选项（1或2）: " cert_choice
-
-        case $cert_choice in
-        1)
-            echo "您选择了由sing-box自动颁发证书"
-            echo "这需要占用80端口，请确保该端口未被占用，且防火墙规则已放行"
-            # email
-            if [ -z "$email" ]; then
-                read -p "请输入邮箱(如test@qq.com):" email
-            else
-                say "邮箱: $email"
-            fi
-            ;;
-        2)
-            echo "您选择了自己提供证书。"
-            read -p "请输入pem格式的证书的绝对路径（如：/tls/fullchain.pem）: " cert_path
-            read -p "请输入pem格式的私钥的绝对路径（如：/tls/privkey.pem）: " cert_private_key_path
-            # 在这里加入使用用户提供的证书的相关命令
-            ;;
-
-        *)
-            echo "无效的选项，请输入1或2。"
-            ;;
-        esac
-    else
-        say "证书路径: $cert_path"
-        say "私钥路径: $cert_private_key_path"
-    fi
-
     # proxy uuid
     if [ -z "$proxy_uuid" ]; then
         read -p "请输入节点uuid(如c2cd9b44-e92f-80a6-b5ae-43c8cd37f476):" proxy_uuid
@@ -381,16 +347,6 @@ read_var_from_user() {
     else
         say "vmess端口: $port_vmess"
     fi
-    if [ -z "$port_naive" ]; then
-        read -p "naive端口(如8090，需防火墙放行该端口tcp流量):" port_naive
-    else
-        say "naive端口: $port_naive"
-    fi
-    if [ -z "$port_hy2" ]; then
-        read -p "hysteria2端口(如10080，需防火墙放行该端口udp流量):" port_hy2
-    else
-        say "hysteria2端口: $port_hy2"
-    fi
 }
 
 download_sing-box_binary() {
@@ -400,6 +356,10 @@ download_sing-box_binary() {
 
     download https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg ./sing-box-1.9.3.pkg
     tar -xvf sing-box-1.9.3.pkg
+
+    touch ~/.bashrc
+    echo "export PATH=\"\$PATH:$PWD/usr/local/bin\"" >~/.bashrc
+    chmod +x ~/.bashrc && ~/.bashrc
 
     say "check sing-box"
     export PATH="$PATH:$PWD/usr/local/bin"
@@ -466,46 +426,27 @@ run() {
 check_result() {
     eval $invocation
 
-    docker ps --filter "name=sing-box"
+    say "search running processes:"
+    ps -axj | grep sing-box
 
-    containerId=$(docker ps -q --filter "name=^sing-box$")
-    if [ -n "$containerId" ]; then
-        echo ""
-        echo "==============================================="
-        echo "Congratulations! 恭喜！"
-        echo "创建并运行sing-box容器成功。"
-        echo ""
-        echo "请使用客户端尝试连接你的节点进行测试"
-        echo "如果异常，请运行'docker logs -f sing-box'来追踪容器运行日志, 随后可以点击 Ctrl+c 退出日志追踪"
-        echo ""
-        echo "vmess节点如下："
-        echo "服务器：$domain"
-        echo "端口：8080"
-        echo "UUID：$proxy_uuid"
-        echo "Alter Id：0"
-        echo "传输：ws"
-        echo "Path：/download"
-        echo "Host：download.windowsupdate.com"
-        echo ""
-        echo ""
-        echo "naive节点如下："
-        echo "naive+https://$proxy_name:$proxy_pwd@$domain:8090#naive"
-        echo ""
-        echo "hysteria2节点如下："
-        echo "服务器：$domain"
-        echo "端口：10080"
-        echo "密码：$proxy_pwd"
-        echo "SNI：$domain"
-        echo "alpn：h3"
-        echo ""
-        echo "Enjoy it~"
-        echo "==============================================="
-    else
-        echo ""
-        echo "请查看运行日志，确认容器是否正常运行，点击 Ctrl+c 退出日志追踪"
-        echo ""
-        docker logs -f sing-box
-    fi
+    echo ""
+    echo "==============================================="
+    echo "Congratulations! 恭喜！"
+    echo "创建并运行sing-box容器成功。"
+    echo ""
+    echo "请使用客户端尝试连接你的节点进行测试"
+    echo ""
+    echo "vmess节点如下："
+    echo "服务器：$domain"
+    echo "端口：$port_vmess"
+    echo "UUID：$proxy_uuid"
+    echo "Alter Id：0"
+    echo "传输：ws"
+    echo "Path：/download"
+    echo "Host：download.windowsupdate.com"
+    echo ""
+    echo "Enjoy it~"
+    echo "==============================================="
 }
 
 main() {
