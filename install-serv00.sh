@@ -389,6 +389,10 @@ replace_configs() {
     sed 's|<domain>|'"$domain"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
+    # replace port
+    sed 's|<port_vmess>|'"$port_vmess"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
+
     # certs
     sed 's|<cert_path>|'"$cert_path"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
