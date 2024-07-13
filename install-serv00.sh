@@ -222,12 +222,13 @@ echo ' |_| \_\__,_|\__, | |____/|_|_| |_|\__, | '
 echo '             |___/                 |___/  '
 
 # ------------vars-----------
-WORK_DIR="$PWD"
+WORK_DIR="$PWD" # ~/sing-box
 
 gitRowUrl="https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main"
 
 sbox_pkg_url="https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg" # https://pkgs.org/download/sing-box
 sbox_pkg_fileName="sing-box-1.9.3.pkg"
+sbox_bin_url="https://raw.githubusercontent.com/k0baya/sb-for-serv00/main/sing-box"
 status_sbox=0 # 0.未下载；1.已安装未运行；2.运行
 SING_BOX_PID=""
 log_file="$WORK_DIR/data/sing-box.log"
@@ -348,11 +349,11 @@ read_var_from_user() {
     else
         say "vmess端口: $port_vmess"
     fi
-    # if [ -z "$port_reality" ]; then
-    #     read -p "reality端口(如8088，需防火墙放行该端口tcp流量):" port_reality
-    # else
-    #     say "reality端口: $port_reality"
-    # fi
+    if [ -z "$port_reality" ]; then
+        read -p "reality端口(如8088，需防火墙放行该端口tcp流量):" port_reality
+    else
+        say "reality端口: $port_reality"
+    fi
 }
 
 check_status() {
@@ -382,7 +383,7 @@ install_sbox_binary() {
 
     say "installing"
 
-    download $sbox_pkg_url ./$sbox_pkg_fileName
+    download $sbox_pkg_url $WORK_DIR/$sbox_pkg_fileName
     tar -xvf $sbox_pkg_fileName
 
     touch ~/.bashrc
@@ -391,6 +392,21 @@ install_sbox_binary() {
 
     say "check sing-box"
     export PATH="$PATH:$PWD/usr/local/bin"
+    sing-box version
+}
+
+install_sbox_bin(){
+    eval $invocation
+    say "installing"
+
+    download $sbox_bin_url $WORK_DIR/sing-box
+    chmod +x $WORK_DIR/sing-box
+
+    touch ~/.bashrc
+    echo "export PATH=\"\$PATH:$WORK_DIR\"" > ~/.bashrc
+    chmod +x ~/.bashrc && . ~/.bashrc
+
+    say "check sing-box"
     sing-box version
 }
 
@@ -505,6 +521,16 @@ get_sub(){
     echo "Path：/download"
     echo "Host：download.windowsupdate.com"
     echo ""
+    echo "【reality节点】如下："
+    # [ -s $WORK_DIR/data/config.json ] && local JSON=$(cat $WORK_DIR/data/config.json) \
+    # && port_vmess=$(echo "$JSON" | awk -F '[:,]' '/"listen_port"/ {gsub(/[^0-9]/, "", $2); print $2}') \
+    # && proxy_uuid=$(echo "$JSON" | awk -F '"' '/"uuid"/ {print $4}') \
+    # && domain=$(echo "$JSON" | awk -F '"' '/"name"/ {print $4}')
+    # sub_vmess="vmess://$(echo "{\"add\":\"$domain\",\"aid\":\"0\",\"host\":\"download.windowsupdate.com\",\"id\":\"$proxy_uuid\",\"net\":\"ws\",\"path\":\"/download\",\"port\":\"$port_vmess\",\"ps\":\"serv00-vmess\",\"scy\":\"auto\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | base64 -w0 )"
+    # echo "订阅：$sub_vmess"
+    echo "服务器：$domain"
+    echo "端口：$port_reality"
+    echo "UUID：$proxy_uuid"
     echo "Enjoy it~"
     echo "==============================================="
 }
@@ -572,7 +598,8 @@ menu() {
 }
 
 init(){
-    install_sbox_binary
+    #install_sbox_binary
+    install_sbox_bin
 
     read_var_from_user
 

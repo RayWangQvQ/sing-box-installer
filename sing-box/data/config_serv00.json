@@ -26,6 +26,33 @@
             "Host": "download.windowsupdate.com"
           }
         }
+      },
+      {
+        "type": "vless",
+        "tag": "reality-in",
+        "listen": "::",
+        "listen_port": <port_reality>,
+        "users": [
+          {
+            "uuid": "<proxy_uuid>",
+            "flow": "xtls-rprx-vision"
+          }
+        ],
+        "packet_encoding": "xudp",
+        "server": "<domain>",
+        "tls": {
+          "enabled": true,
+          "server_name": "<reality_server_name>",
+          "reality": {
+            "enabled": true,
+            "handshake": {
+              "server": "<reality_server_name>",
+              "server_port": 443
+            },
+            "private_key": "<reality_private_key>",
+            "short_id": ""
+          }
+        }
       }
     ]
   }
