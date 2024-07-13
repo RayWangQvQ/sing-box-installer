@@ -249,8 +249,10 @@ port_hy2=""
 port_reality=""
 
 reality_server_name="addons.mozilla.org"
-reality_private_key="$WORK_DIR/certs/$reality_server_name/private_key.pem"
-reality_cert="$WORK_DIR/certs/$reality_server_name/certificate.pem"
+reality_private_key=""
+reality_private_key_file="$WORK_DIR/certs/$reality_server_name/private_key.txt"
+reality_cert=""
+reality_cert_file="$WORK_DIR/certs/$reality_server_name/certificate.txt"
 
 verbose=false
 # --------------------------
@@ -417,12 +419,12 @@ download_data_files() {
     mkdir -p ./data
 
     # config.json
-    rm -rf ./data/config.json
-    download $gitRowUrl/sing-box/data/config_serv00.json ./data/config.json
+    rm -rf $WORK_DIR/data/config.json
+    download $gitRowUrl/sing-box/data/config_serv00.json $WORK_DIR/data/config.json
 
     # entry.sh
-    rm -rf ./data/entry.sh
-    download $gitRowUrl/sing-box/data/entry.sh ./data/entry.sh
+    rm -rf $WORK_DIR/data/entry.sh
+    download $gitRowUrl/sing-box/data/entry.sh $WORK_DIR/data/entry.sh
 }
 
 # 配置
@@ -473,15 +475,19 @@ replace_configs() {
     # reality_private_key
     # 生成 Reality 公私钥，第一次安装的时候使用新生成的；添加协议的时，使用相应数组里的第一个非空值，如全空则像第一次安装那样使用新生成的
     mkdir -p $WORK_DIR/certs/$reality_server_name
-    if [ ! -e "$reality_private_key" ];then
+    if [ ! -e "$reality_private_key_file" ];then
         say "reality密钥不存在，开始生成"
-        sing-box generate tls-keypair $reality_server_name > $WORK_DIR/certs/$reality_server_name/temp_output.txt
+        keypair = $(sing-box generate reality-keypair)
         # 将私钥和证书分开
-        awk '/-----BEGIN PRIVATE KEY-----/,/-----END PRIVATE KEY-----/' $WORK_DIR/certs/$reality_server_name/temp_output.txt > $reality_private_key
-        awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' $WORK_DIR/certs/$reality_server_name/temp_output.txt > $reality_cert
-        echo "Private key saved to $reality_private_key"
-        echo "Certificate saved to $reality_cert"
+        reality_private_key=$(echo $keypair | grep "PrivateKey:" | awk -F": " '{print $2}')
+        reality_cert=$(echo $keypair | grep "PublicKey:" | awk -F": " '{print $2}')
+        echo $reality_private_key > $reality_private_key_file
+        echo $reality_cert > $reality_cert_file
     fi
+    reality_private_key=$(cat $reality_private_key_file)
+    reality_cert=$(cat $reality_cert_file)
+    echo "Private key saved to $reality_private_key"
+    echo "Certificate saved to $reality_cert"
     sed 's|<reality_private_key>|'"$reality_private_key"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
