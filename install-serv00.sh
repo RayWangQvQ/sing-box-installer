@@ -336,10 +336,11 @@ read_var_from_user() {
     # host
     if [ -z "$domain" ]; then
         echo "节点需要一个域名，请提供一个域名或IP："
-        read -p "请输入域名(如demo.test.tk):" domain
+        read -p "请输入域名或IP(如demo.test.tk):" domain
     else
         say "域名: $domain"
     fi
+    proxy_name=$domain
 
     # 端口
     if [ -z "$port_vmess" ]; then
@@ -486,11 +487,17 @@ get_sub(){
     echo ""
     echo "==============================================="
     echo "Congratulations! 恭喜！"
-    echo "创建并运行sing-box容器成功。"
+    echo "创建并运行sing-box服务成功。"
     echo ""
     echo "请使用客户端尝试连接你的节点进行测试"
     echo ""
-    echo "vmess节点如下："
+    echo "【vmess节点】如下："
+    [ -s $WORK_DIR/data/config.json ] && local JSON=$(cat $WORK_DIR/data/config.json) \
+    && port_vmess=$(echo "$JSON" | awk -F '[:,]' '/"listen_port"/ {gsub(/[^0-9]/, "", $2); print $2}') \
+    && proxy_uuid=$(echo "$JSON" | awk -F '"' '/"uuid"/ {print $4}') \
+    && domain=$(echo "$JSON" | awk -F '"' '/"name"/ {print $4}')
+    sub_vmess="vmess://$(echo "{\"add\":\"$domain\",\"aid\":\"0\",\"host\":\"download.windowsupdate.com\",\"id\":\"$proxy_uuid\",\"net\":\"ws\",\"path\":\"/download\",\"port\":\"$port_vmess\",\"ps\":\"serv00-vmess\",\"scy\":\"auto\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | base64 -w0 )"
+    echo "订阅：$sub_vmess"
     echo "服务器：$domain"
     echo "端口：$port_vmess"
     echo "UUID：$proxy_uuid"
@@ -524,14 +531,16 @@ menu_setting() {
 
   if [[ -n "$SING_BOX_PID" ]]; then
     OPTION[1]="1 .  查看sing-box运行状态"
-    OPTION[2]="2 .  查看sing-box日志"
-    OPTION[3]="3 .  关闭sing-box"
-    OPTION[4]="4 .  卸载"
+    OPTION[2]="2 .  查看订阅"
+    OPTION[3]="3 .  查看sing-box日志"
+    OPTION[4]="4 .  关闭sing-box"
+    OPTION[5]="5 .  卸载"
 
     ACTION[1]() { check_status; exit 0; }
-    ACTION[2]() { tail -f $log_file; exit 0; }
-    ACTION[3]() { stop_sbox; exit 0; }
-    ACTION[4]() { uninstall; exit; }
+    ACTION[2]() { get_sub; exit 0; }
+    ACTION[3]() { tail -f $log_file; exit 0; }
+    ACTION[4]() { stop_sbox; exit 0; }
+    ACTION[5]() { uninstall; exit; }
   else
     OPTION[1]="1.  安装sing-box"
     OPTION[2]="2.  启动sing-box"
