@@ -22,18 +22,26 @@ if [ -t 1 ] && command -v tput >/dev/null; then
     fi
 fi
 
+print_prefix="ray_sbox_install"
+
+warning() {
+    printf "%b\n" "${yellow:-}$1${normal:-}" >&3
+}
 say_warning() {
-    printf "%b\n" "${yellow:-}ray_naive_install: Warning: $1${normal:-}" >&3
+    printf "%b\n" "${yellow:-}$print_prefix: Warning: $1${normal:-}" >&3
 }
 
+err() {
+    printf "%b\n" "${red:-}$1${normal:-}" >&2
+}
 say_err() {
-    printf "%b\n" "${red:-}ray_naive_install: Error: $1${normal:-}" >&2
+    printf "%b\n" "${red:-}$print_prefix: Error: $1${normal:-}" >&2
 }
 
 say() {
     # using stream 3 (defined in the beginning) to not interfere with stdout of functions
     # which may be used as return value
-    printf "%b\n" "${cyan:-}ray_naive_install:${normal:-} $1" >&3
+    printf "%b\n" "${cyan:-}$print_prefix:${normal:-} $1" >&3
 }
 
 say_verbose() {
@@ -213,12 +221,19 @@ echo ' |  _ < (_| | |_| |  ___) | | | | | (_| | '
 echo ' |_| \_\__,_|\__, | |____/|_|_| |_|\__, | '
 echo '             |___/                 |___/  '
 
-# ------------vars-----------、
+# ------------vars-----------
+WORK_DIR="$PWD"
+
 gitRowUrl="https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main"
 
+sbox_pkg_url="https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg"
+sbox_pkg_fileName="sing-box-1.9.3.pkg"
+SING_BOX_PID=""
+log_file="$WORK_DIR/data/sing-box.log"
+
 proxy_uuid=""
-proxy_name=""
-proxy_pwd=""
+proxy_name="ray"
+proxy_pwd="ray1qaz@WSX"
 
 domain=""
 cert_choice=""
@@ -327,20 +342,6 @@ read_var_from_user() {
         say "节点uuid: $proxy_uuid"
     fi
 
-    # proxy用户名
-    if [ -z "$proxy_name" ]; then
-        read -p "请输入节点用户名(如ray):" proxy_name
-    else
-        say "节点用户名: $proxy_name"
-    fi
-
-    # proxy密码
-    if [ -z "$proxy_pwd" ]; then
-        read -p "请输入节点密码(如1qaz@wsx):" proxy_pwd
-    else
-        say "节点密码: $proxy_pwd"
-    fi
-
     # 端口
     if [ -z "$port_vmess" ]; then
         read -p "vmess端口(如8080，需防火墙放行该端口tcp流量):" port_vmess
@@ -349,17 +350,31 @@ read_var_from_user() {
     fi
 }
 
+check_install() {
+    eval $invocation
+    ps -axj | grep sing-box
+    SING_BOX_PID=$(ps -axj | awk '$0 ~ "sing-box run" && $0 !~ "awk" {print $2}')
+
+    say_verbose "PID: $SING_BOX_PID"
+
+    if [ -z $SING_BOX_PID ];then
+        say "当前未安装sing-box";
+    else
+        say "当前已安装sing-box"
+    fi
+}
+
 download_sing-box_binary() {
     eval $invocation
 
     say "installing"
 
-    download https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg ./sing-box-1.9.3.pkg
-    tar -xvf sing-box-1.9.3.pkg
+    download $sbox_pkg_url ./$sbox_pkg_fileName
+    tar -xvf $sbox_pkg_fileName
 
     touch ~/.bashrc
-    echo "export PATH=\"\$PATH:$PWD/usr/local/bin\"" >~/.bashrc
-    chmod +x ~/.bashrc && ~/.bashrc
+    echo "export PATH=\"\$PATH:$PWD/usr/local/bin\"" > ~/.bashrc
+    chmod +x ~/.bashrc && . ~/.bashrc
 
     say "check sing-box"
     export PATH="$PATH:$PWD/usr/local/bin"
@@ -384,6 +399,10 @@ download_data_files() {
 # 配置
 replace_configs() {
     eval $invocation
+
+    # replace log
+    sed 's|<log_file>|'"$log_file"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
 
     # replace domain
     sed 's|<domain>|'"$domain"'|g' ./data/config.json >./data/config.json.new
@@ -419,14 +438,14 @@ replace_configs() {
     cat ./data/config.json
 }
 
-# 运行容器
+# 运行
 run() {
     eval $invocation
 
-    chmod +x ./data/entry.sh && ./data/entry.sh $PWD/data
+    chmod +x ./data/entry.sh && ./data/entry.sh $PWD/data true
 }
 
-# 检查容器运行状态
+# 检查运行状态
 check_result() {
     eval $invocation
 
@@ -453,7 +472,71 @@ check_result() {
     echo "==============================================="
 }
 
-main() {
+uninstall(){
+    eval $invocation
+
+    rm -rf $WORK_DIR/*
+    say_warning "完成"
+}
+
+stop_sbox(){
+    eval $invocation
+
+    kill -9 $SING_BOX_PID
+}
+
+restart_sbox(){
+    eval $invocation
+
+    stop_sbox
+    run
+}
+
+menu_setting() {
+  eval $invocation
+  
+  check_install
+
+  if [[ -n "$SING_BOX_PID" ]]; then
+    OPTION[1]="1 .  重启sing-box"
+    OPTION[2]="2 .  重启sing-box"
+    OPTION[3]="3 .  关闭sing-box"
+    OPTION[4]="4 .  卸载"
+
+    ACTION[1]() { check_install; exit 0; }
+    ACTION[2]() { stop_sbox; exit 0; }
+    ACTION[3]() { uninstall; exit; }
+    ACTION[4]() { uninstall; exit; }
+  else
+    OPTION[1]="1.  安装sing-box"
+    OPTION[2]="2.  卸载"
+
+    ACTION[1]() { init; exit; }
+    ACTION[2]() { uninstall; exit; }
+  fi
+
+  [ "${#OPTION[@]}" -ge '10' ] && OPTION[0]="0 .  Exit" || OPTION[0]="0.  Exit"
+  ACTION[0]() { exit; }
+}
+
+menu() {
+  eval $invocation
+
+  say "======================================================================================================================"
+  for ((b=1;b<=${#OPTION[*]};b++)); 
+  do [ "$b" = "${#OPTION[*]}" ] && warning " ${OPTION[0]} " || warning " ${OPTION[b]} "; 
+  done
+  read -rp "Choose: " CHOOSE
+
+  # 输入必须是数字且少于等于最大可选项
+  if grep -qE "^[0-9]{1,2}$" <<< "$CHOOSE" && [ "$CHOOSE" -lt "${#OPTION[*]}" ]; then
+    ACTION[$CHOOSE]
+  else
+    warning " Please enter the correct number [0-$((${#OPTION[*]}-1))] " && sleep 1 && menu
+  fi
+}
+
+init(){
     download_sing-box_binary
 
     read_var_from_user
@@ -464,6 +547,11 @@ main() {
     run
 
     check_result
+}
+
+main() {
+    menu_setting
+    menu
 }
 
 main
