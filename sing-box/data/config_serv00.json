@@ -38,7 +38,6 @@
             "flow": "xtls-rprx-vision"
           }
         ],
-        "packet_encoding": "xudp",
         "server": "<domain>",
         "tls": {
           "enabled": true,
