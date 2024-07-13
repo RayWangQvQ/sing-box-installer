@@ -477,17 +477,17 @@ replace_configs() {
     mkdir -p $WORK_DIR/certs/$reality_server_name
     if [ ! -e "$reality_private_key_file" ];then
         say "reality密钥不存在，开始生成"
-        keypair = $(sing-box generate reality-keypair)
+        keypair=$(sing-box generate reality-keypair)
         # 将私钥和证书分开
-        reality_private_key=$(echo $keypair | grep "PrivateKey:" | awk -F": " '{print $2}')
-        reality_cert=$(echo $keypair | grep "PublicKey:" | awk -F": " '{print $2}')
+        reality_private_key=$(echo "$keypair" | grep -o "PrivateKey: .*" | awk -F': ' '{print $2}')
+        reality_cert=$(echo "$keypair" | grep -o "PublicKey: .*" | awk -F': ' '{print $2}')
         echo $reality_private_key > $reality_private_key_file
         echo $reality_cert > $reality_cert_file
     fi
     reality_private_key=$(cat $reality_private_key_file)
     reality_cert=$(cat $reality_cert_file)
-    echo "Private key saved to $reality_private_key"
-    echo "Certificate saved to $reality_cert"
+    echo "Private key: $reality_private_key"
+    echo "Certificate: $reality_cert"
     sed 's|<reality_private_key>|'"$reality_private_key"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
