@@ -234,10 +234,12 @@ SING_BOX_PID=""
 log_file="$WORK_DIR/data/sing-box.log"
 
 proxy_uuid=""
+proxy_uuid_file="$WORK_DIR/data/uuid.txt"
 proxy_name="ray"
 proxy_pwd="ray1qaz@WSX"
 
 domain=""
+domain_file="$WORK_DIR/data/domain.txt"
 cert_choice=""
 cert_path=""
 cert_private_key_path=""
@@ -431,15 +433,17 @@ download_data_files() {
 replace_configs() {
     eval $invocation
 
-    # replace log
+    # log
     sed 's|<log_file>|'"$log_file"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
-    # replace domain
+    # domain
     sed 's|<domain>|'"$domain"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
+    touch $domain_file
+    echo $domain > $domain_file
 
-    # replace port
+    # port
     sed 's|<port_vmess>|'"$port_vmess"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
     sed 's|<port_reality>|'"$port_reality"'|g' ./data/config.json >./data/config.json.new
@@ -451,14 +455,20 @@ replace_configs() {
     sed 's|<cert_private_key_path>|'"$cert_private_key_path"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
-    # replace mail
+    # mail
     sed 's|<email>|'"$email"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
     # proxy_uuid
-    proxy_uuid=$(sing-box generate uuid)
+    if [ ! -e "$proxy_uuid_file" ];then
+        proxy_uuid=$(sing-box generate uuid)
+        touch $proxy_uuid_file
+        echo $proxy_uuid > $proxy_uuid_file
+    fi
+    proxy_uuid=$(cat $proxy_uuid_file)
     sed 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
+
 
     # proxy_name
     sed 's|<proxy_name>|'"$proxy_name"'|g' ./data/config.json >./data/config.json.new
@@ -511,12 +521,16 @@ get_sub(){
     echo "创建并运行sing-box服务成功。"
     echo ""
     echo "请使用客户端尝试连接你的节点进行测试"
+
+    local JSON=$(cat $WORK_DIR/data/config.json)
     echo ""
-    echo "【vmess节点】如下："
-    [ -s $WORK_DIR/data/config.json ] && local JSON=$(cat $WORK_DIR/data/config.json) \
-    && port_vmess=$(echo "$JSON" | awk -F '[:,]' '/"listen_port"/ {gsub(/[^0-9]/, "", $2); print $2}') \
-    && proxy_uuid=$(echo "$JSON" | awk -F '"' '/"uuid"/ {print $4}') \
-    && domain=$(echo "$JSON" | awk -F '"' '/"name"/ {print $4}')
+    echo ""
+    echo ""
+    echo "==============================================="
+    err "【vmess节点】如下："
+    port_vmess=$(jq '.inbounds[0].listen_port' <<< "$JSON")
+    proxy_uuid=$(jq '.inbounds[0].users[0].uuid' <<< "$JSON")
+    domain=$(cat $domain_file)
     sub_vmess="vmess://$(echo "{\"add\":\"$domain\",\"aid\":\"0\",\"host\":\"download.windowsupdate.com\",\"id\":\"$proxy_uuid\",\"net\":\"ws\",\"path\":\"/download\",\"port\":\"$port_vmess\",\"ps\":\"serv00-vmess\",\"scy\":\"auto\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | base64 -w0 )"
     echo "订阅：$sub_vmess"
     echo "服务器：$domain"
@@ -527,16 +541,26 @@ get_sub(){
     echo "Path：/download"
     echo "Host：download.windowsupdate.com"
     echo ""
-    echo "【reality节点】如下："
-    # [ -s $WORK_DIR/data/config.json ] && local JSON=$(cat $WORK_DIR/data/config.json) \
-    # && port_vmess=$(echo "$JSON" | awk -F '[:,]' '/"listen_port"/ {gsub(/[^0-9]/, "", $2); print $2}') \
-    # && proxy_uuid=$(echo "$JSON" | awk -F '"' '/"uuid"/ {print $4}') \
-    # && domain=$(echo "$JSON" | awk -F '"' '/"name"/ {print $4}')
-    # sub_vmess="vmess://$(echo "{\"add\":\"$domain\",\"aid\":\"0\",\"host\":\"download.windowsupdate.com\",\"id\":\"$proxy_uuid\",\"net\":\"ws\",\"path\":\"/download\",\"port\":\"$port_vmess\",\"ps\":\"serv00-vmess\",\"scy\":\"auto\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | base64 -w0 )"
-    # echo "订阅：$sub_vmess"
+    echo ""
+    echo ""
+    echo "==============================================="
+    err "【reality节点】如下："
+    port_reality=$(jq '.inbounds[1].listen_port' <<< "$JSON")
+    proxy_uuid=$(jq '.inbounds[1].users[0].uuid' <<< "$JSON")
+    domain=$(cat $domain_file)
+    reality_server_name=$(jq '.inbounds[1].tls.server_name' <<< "$JSON")
+    reality_cert=$(cat $reality_cert_file)
+    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&fp=edge&pbk=$$reality_cert&type=tcp&flow=xtls-rprx-vision&encryption=none#serv00-reality"
+    echo "订阅：$sub_reality"
     echo "服务器：$domain"
     echo "端口：$port_reality"
     echo "UUID：$proxy_uuid"
+    echo "Flow：xtls-rprx-vision"
+    echo "传输：tcp"
+    echo "传输安全：tls"
+    echo "TLS SNI：$reality_server_name"
+    echo "Reality公钥：$reality_cert"
+    echo "Reality Sid："
     echo "Enjoy it~"
     echo "==============================================="
 }

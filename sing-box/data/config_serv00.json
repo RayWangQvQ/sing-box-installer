@@ -34,6 +34,7 @@
         "listen_port": <port_reality>,
         "users": [
           {
+            "name": "<proxy_name>",
             "uuid": "<proxy_uuid>",
             "flow": "xtls-rprx-vision"
           }
