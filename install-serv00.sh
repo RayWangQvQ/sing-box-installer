@@ -226,7 +226,7 @@ WORK_DIR="$PWD"
 
 gitRowUrl="https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main"
 
-sbox_pkg_url="https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg"
+sbox_pkg_url="https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg" # https://pkgs.org/download/sing-box
 sbox_pkg_fileName="sing-box-1.9.3.pkg"
 status_sbox=0 # 0.未下载；1.已安装未运行；2.运行
 SING_BOX_PID=""
@@ -347,11 +347,11 @@ read_var_from_user() {
     else
         say "vmess端口: $port_vmess"
     fi
-    if [ -z "$port_reality" ]; then
-        read -p "reality端口(如8088，需防火墙放行该端口tcp流量):" port_reality
-    else
-        say "reality端口: $port_reality"
-    fi
+    # if [ -z "$port_reality" ]; then
+    #     read -p "reality端口(如8088，需防火墙放行该端口tcp流量):" port_reality
+    # else
+    #     say "reality端口: $port_reality"
+    # fi
 }
 
 check_status() {
@@ -362,16 +362,16 @@ check_status() {
     say_verbose "sing-box PID: $SING_BOX_PID"
 
     if [ -n "$SING_BOX_PID" ];then
-        err "sing-box正在运行"
+        err "\nsing-box正在运行"
         status_sbox="2"
     else
         . ~/.bashrc
         sing-box version
         if [ $? -eq 0 ];then
-            err "已安装sing-box，但未运行"
+            err "\n已安装sing-box，但未运行"
             status_sbox="1"
         else
-            err "当前未安装sing-box";
+            err "\n当前未安装sing-box";
             status_sbox="0"
         fi
     fi
@@ -538,7 +538,7 @@ menu_setting() {
     OPTION[3]="3.  卸载"
 
     ACTION[1]() { init; exit; }
-    ACTION[2]() { run_sbox; check_result; exit; }
+    ACTION[2]() { run_sbox; check_status; exit; }
     ACTION[3]() { uninstall; exit; }
   fi
 

@@ -3,13 +3,15 @@
  # @Author: Ray zai7lou@outlook.com
  # @Date: 2024-07-12 22:00:19
  # @LastEditors: Ray zai7lou@outlook.com
- # @LastEditTime: 2024-07-13 10:22:23
+ # @LastEditTime: 2024-07-13 14:15:04
  # @FilePath: \sing-box-installer\sing-box\data\entry.sh
  # @Description: 
  # 
  # Copyright (c) 2024 by ${git_name_email}, All Rights Reserved. 
 ### 
 set -e
+set -u
+set -o pipefail
 
 dir_data=$1
 nohup=$2
