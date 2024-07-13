@@ -83,7 +83,7 @@ get_http_header_wget() {
     wget $wget_options $wget_options_extra "$remote_path" 2>&1
     wget_result=$?
 
-    if [[ $wget_result == 2 ]]; then
+    if [[ $wget_result = 2 ]]; then
         # Parsing of the command has failed. Exclude potentially unrecognized options and retry.
         wget $wget_options "$remote_path" 2>&1
         return $?
@@ -143,7 +143,7 @@ downloadwget() {
         wget_result=$?
     fi
 
-    if [[ $wget_result == 2 ]]; then
+    if [[ $wget_result = 2 ]]; then
         # Parsing of the command has failed. Exclude potentially unrecognized options and retry.
         if [ -z "$out_path" ]; then
             wget -q $wget_options -O - "$remote_path_with_credential" 2>&1
@@ -228,6 +228,7 @@ gitRowUrl="https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer/main"
 
 sbox_pkg_url="https://pkg.freebsd.org/FreeBSD:14:amd64/latest/All/sing-box-1.9.3.pkg"
 sbox_pkg_fileName="sing-box-1.9.3.pkg"
+status_sbox=0 # 0.未下载；1.已安装未运行；2.运行
 SING_BOX_PID=""
 log_file="$WORK_DIR/data/sing-box.log"
 
@@ -244,6 +245,11 @@ email=""
 port_vmess=""
 port_naive=""
 port_hy2=""
+port_reality=""
+
+reality_server_name="addons.mozilla.org"
+reality_private_key="$WORK_DIR/certs/$reality_server_name/private_key.pem"
+reality_cert="$WORK_DIR/certs/$reality_server_name/certificate.pem"
 
 verbose=false
 # --------------------------
@@ -329,17 +335,10 @@ read_var_from_user() {
 
     # host
     if [ -z "$domain" ]; then
-        echo "节点需要一个域名，请提供一个域名，且确保该域名已DNS到服务器ip："
+        echo "节点需要一个域名，请提供一个域名或IP："
         read -p "请输入域名(如demo.test.tk):" domain
     else
         say "域名: $domain"
-    fi
-
-    # proxy uuid
-    if [ -z "$proxy_uuid" ]; then
-        read -p "请输入节点uuid(如c2cd9b44-e92f-80a6-b5ae-43c8cd37f476):" proxy_uuid
-    else
-        say "节点uuid: $proxy_uuid"
     fi
 
     # 端口
@@ -348,23 +347,37 @@ read_var_from_user() {
     else
         say "vmess端口: $port_vmess"
     fi
+    if [ -z "$port_reality" ]; then
+        read -p "reality端口(如8088，需防火墙放行该端口tcp流量):" port_reality
+    else
+        say "reality端口: $port_reality"
+    fi
 }
 
-check_install() {
+check_status() {
     eval $invocation
     ps -axj | grep sing-box
     SING_BOX_PID=$(ps -axj | awk '$0 ~ "sing-box run" && $0 !~ "awk" {print $2}')
 
-    say_verbose "PID: $SING_BOX_PID"
+    say_verbose "sing-box PID: $SING_BOX_PID"
 
-    if [ -z $SING_BOX_PID ];then
-        say "当前未安装sing-box";
+    if [ -n "$SING_BOX_PID" ];then
+        err "sing-box正在运行"
+        status_sbox="2"
     else
-        say "当前已安装sing-box"
+        . ~/.bashrc
+        sing-box version
+        if [ $? -eq 0 ];then
+            err "已安装sing-box，但未运行"
+            status_sbox="1"
+        else
+            err "当前未安装sing-box";
+            status_sbox="0"
+        fi
     fi
 }
 
-download_sing-box_binary() {
+install_sbox_binary() {
     eval $invocation
 
     say "installing"
@@ -411,6 +424,8 @@ replace_configs() {
     # replace port
     sed 's|<port_vmess>|'"$port_vmess"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
+    sed 's|<port_reality>|'"$port_reality"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
 
     # certs
     sed 's|<cert_path>|'"$cert_path"'|g' ./data/config.json >./data/config.json.new
@@ -423,6 +438,7 @@ replace_configs() {
     mv ./data/config.json.new ./data/config.json
 
     # proxy_uuid
+    proxy_uuid=$(sing-box generate uuid)
     sed 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
@@ -434,23 +450,38 @@ replace_configs() {
     sed 's|<proxy_pwd>|'"$proxy_pwd"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
+    # reality_server_name
+    sed 's|<reality_server_name>|'"$reality_server_name"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
+
+    # reality_private_key
+    # 生成 Reality 公私钥，第一次安装的时候使用新生成的；添加协议的时，使用相应数组里的第一个非空值，如全空则像第一次安装那样使用新生成的
+    mkdir -p $WORK_DIR/certs/$reality_server_name
+    if [ ! -e "$reality_private_key" ];then
+        say "reality密钥不存在，开始生成"
+        sing-box generate tls-keypair $reality_server_name > $WORK_DIR/certs/$reality_server_name/temp_output.txt
+        # 将私钥和证书分开
+        awk '/-----BEGIN PRIVATE KEY-----/,/-----END PRIVATE KEY-----/' $WORK_DIR/certs/$reality_server_name/temp_output.txt > $reality_private_key
+        awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' $WORK_DIR/certs/$reality_server_name/temp_output.txt > $reality_cert
+        echo "Private key saved to $reality_private_key"
+        echo "Certificate saved to $reality_cert"
+    fi
+    sed 's|<reality_private_key>|'"$reality_private_key"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
+
     say "config.json:"
     cat ./data/config.json
 }
 
 # 运行
-run() {
+run_sbox() {
     eval $invocation
 
-    chmod +x ./data/entry.sh && ./data/entry.sh $PWD/data true
+    chmod +x $WORK_DIR/data/entry.sh && $WORK_DIR/data/entry.sh $PWD/data true
 }
 
-# 检查运行状态
-check_result() {
+get_sub(){
     eval $invocation
-
-    say "search running processes:"
-    ps -axj | grep sing-box
 
     echo ""
     echo "==============================================="
@@ -483,36 +514,32 @@ stop_sbox(){
     eval $invocation
 
     kill -9 $SING_BOX_PID
-}
-
-restart_sbox(){
-    eval $invocation
-
-    stop_sbox
-    run
+    say "已关闭"
 }
 
 menu_setting() {
   eval $invocation
   
-  check_install
+  check_status
 
   if [[ -n "$SING_BOX_PID" ]]; then
-    OPTION[1]="1 .  重启sing-box"
-    OPTION[2]="2 .  重启sing-box"
+    OPTION[1]="1 .  查看sing-box运行状态"
+    OPTION[2]="2 .  查看sing-box日志"
     OPTION[3]="3 .  关闭sing-box"
     OPTION[4]="4 .  卸载"
 
-    ACTION[1]() { check_install; exit 0; }
-    ACTION[2]() { stop_sbox; exit 0; }
-    ACTION[3]() { uninstall; exit; }
+    ACTION[1]() { check_status; exit 0; }
+    ACTION[2]() { tail -f $log_file; exit 0; }
+    ACTION[3]() { stop_sbox; exit 0; }
     ACTION[4]() { uninstall; exit; }
   else
     OPTION[1]="1.  安装sing-box"
-    OPTION[2]="2.  卸载"
+    OPTION[2]="2.  启动sing-box"
+    OPTION[3]="3.  卸载"
 
     ACTION[1]() { init; exit; }
-    ACTION[2]() { uninstall; exit; }
+    ACTION[2]() { run_sbox; check_result; exit; }
+    ACTION[3]() { uninstall; exit; }
   fi
 
   [ "${#OPTION[@]}" -ge '10' ] && OPTION[0]="0 .  Exit" || OPTION[0]="0.  Exit"
@@ -537,16 +564,17 @@ menu() {
 }
 
 init(){
-    download_sing-box_binary
+    install_sbox_binary
 
     read_var_from_user
 
     download_data_files
     replace_configs
 
-    run
+    run_sbox
 
-    check_result
+    check_status
+    get_sub
 }
 
 main() {
