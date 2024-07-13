@@ -367,8 +367,7 @@ check_status() {
         status_sbox="2"
     else
         . ~/.bashrc
-        sing-box version
-        if [ $? -eq 0 ];then
+        if machine_has "sing-box";then
             err "\n已安装sing-box，但未运行"
             status_sbox="1"
         else
