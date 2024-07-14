@@ -563,7 +563,7 @@ get_sub(){
     reality_server_name=$(jq -r '.inbounds[1].tls.server_name' <<< "$JSON")
     reality_cert=$(cat $reality_cert_file)
     reality_short_id=$(cat $reality_short_id_file)
-    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$reality_cert&sid=$reality_short_id&type=tcp#serv00-reality"
+    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$reality_cert&sid=$reality_short_id&type=tcp&flow=xtls-rprx-vision#serv00-reality"
     echo "订阅：$sub_reality"
     echo "服务器：$domain"
     echo "端口：$port_reality"

@@ -35,7 +35,8 @@
         "users": [
           {
             "name": "ray",
-            "uuid": "<proxy_uuid>"
+            "uuid": "<proxy_uuid>",
+            "flow": "xtls-rprx-vision"
           }
         ],
         "tls": {
