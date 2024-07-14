@@ -506,7 +506,7 @@ replace_configs() {
     if [ ! -e "$reality_short_id_file" ];then
         say "reality short id不存在，开始生成"
         reality_short_id=$(sing-box generate rand 8 --hex)
-        echo $shortId > $reality_short_id_file
+        echo $reality_short_id > $reality_short_id_file
     fi
     reality_short_id=$(cat $reality_short_id_file)
     echo "reality short id: $reality_short_id"
@@ -562,7 +562,8 @@ get_sub(){
     domain=$(cat $domain_file)
     reality_server_name=$(jq '.inbounds[1].tls.server_name' <<< "$JSON")
     reality_cert=$(cat $reality_cert_file)
-    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$$reality_cert&sid=$reality_short_id&type=tcp#serv00-reality"
+    reality_short_id=$(cat $reality_short_id_file)
+    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$reality_cert&sid=$reality_short_id&type=tcp#serv00-reality"
     echo "订阅：$sub_reality"
     echo "服务器：$domain"
     echo "端口：$port_reality"
