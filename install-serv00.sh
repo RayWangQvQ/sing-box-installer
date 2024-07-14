@@ -540,8 +540,8 @@ get_sub(){
     echo ""
     echo "==============================================="
     err "【vmess节点】如下："
-    port_vmess=$(jq '.inbounds[0].listen_port' <<< "$JSON")
-    proxy_uuid=$(jq '.inbounds[0].users[0].uuid' <<< "$JSON")
+    port_vmess=$(jq -r '.inbounds[0].listen_port' <<< "$JSON")
+    proxy_uuid=$(jq -r '.inbounds[0].users[0].uuid' <<< "$JSON")
     domain=$(cat $domain_file)
     sub_vmess="vmess://$(echo "{\"add\":\"$domain\",\"aid\":\"0\",\"host\":\"download.windowsupdate.com\",\"id\":\"$proxy_uuid\",\"net\":\"ws\",\"path\":\"/download\",\"port\":\"$port_vmess\",\"ps\":\"serv00-vmess\",\"scy\":\"auto\",\"sni\":\"\",\"tls\":\"\",\"type\":\"\",\"v\":\"2\"}" | base64 -w0 )"
     echo "订阅：$sub_vmess"
@@ -557,10 +557,10 @@ get_sub(){
     echo ""
     echo "==============================================="
     err "【reality节点】如下："
-    port_reality=$(jq '.inbounds[1].listen_port' <<< "$JSON")
-    proxy_uuid=$(jq '.inbounds[1].users[0].uuid' <<< "$JSON")
+    port_reality=$(jq -r '.inbounds[1].listen_port' <<< "$JSON")
+    proxy_uuid=$(jq -r '.inbounds[1].users[0].uuid' <<< "$JSON")
     domain=$(cat $domain_file)
-    reality_server_name=$(jq '.inbounds[1].tls.server_name' <<< "$JSON")
+    reality_server_name=$(jq -r '.inbounds[1].tls.server_name' <<< "$JSON")
     reality_cert=$(cat $reality_cert_file)
     reality_short_id=$(cat $reality_short_id_file)
     sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$reality_cert&sid=$reality_short_id&type=tcp#serv00-reality"
