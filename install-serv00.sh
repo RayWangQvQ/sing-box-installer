@@ -251,6 +251,8 @@ port_hy2=""
 port_reality=""
 
 reality_server_name="addons.mozilla.org"
+reality_short_id=""
+reality_short_id_file="$WORK_DIR/data/short_id.txt"
 reality_private_key=""
 reality_private_key_file="$WORK_DIR/certs/$reality_server_name/private_key.txt"
 reality_cert=""
@@ -469,7 +471,6 @@ replace_configs() {
     sed 's|<proxy_uuid>|'"$proxy_uuid"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
-
     # proxy_name
     sed 's|<proxy_name>|'"$proxy_name"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
@@ -501,8 +502,18 @@ replace_configs() {
     sed 's|<reality_private_key>|'"$reality_private_key"'|g' ./data/config.json >./data/config.json.new
     mv ./data/config.json.new ./data/config.json
 
-    say "config.json:"
-    cat ./data/config.json
+    # reality_short_id
+    if [ ! -e "$reality_short_id_file" ];then
+        say "reality short id不存在，开始生成"
+        reality_short_id=$(sing-box generate rand 8 --hex)
+        echo $shortId > $reality_short_id_file
+    fi
+    reality_short_id=$(cat $reality_short_id_file)
+    echo "reality short id: $reality_short_id"
+    sed 's|<reality_short_id>|'"$reality_short_id"'|g' ./data/config.json >./data/config.json.new
+    mv ./data/config.json.new ./data/config.json
+
+    say "配置文件已生成"
 }
 
 # 运行
@@ -512,6 +523,7 @@ run_sbox() {
     chmod +x $WORK_DIR/data/entry.sh && $WORK_DIR/data/entry.sh $PWD/data true
 }
 
+# 获取订阅，根据当前配置
 get_sub(){
     eval $invocation
 
@@ -550,7 +562,7 @@ get_sub(){
     domain=$(cat $domain_file)
     reality_server_name=$(jq '.inbounds[1].tls.server_name' <<< "$JSON")
     reality_cert=$(cat $reality_cert_file)
-    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&fp=edge&pbk=$$reality_cert&type=tcp&flow=xtls-rprx-vision&encryption=none#serv00-reality"
+    sub_reality="vless://$proxy_uuid@$domain:$port_reality?security=reality&sni=$reality_server_name&pbk=$$reality_cert&sid=$reality_short_id&type=tcp#serv00-reality"
     echo "订阅：$sub_reality"
     echo "服务器：$domain"
     echo "端口：$port_reality"
@@ -560,7 +572,7 @@ get_sub(){
     echo "传输安全：tls"
     echo "TLS SNI：$reality_server_name"
     echo "Reality公钥：$reality_cert"
-    echo "Reality Sid："
+    echo "Reality Sid：$reality_short_id"
     echo "Enjoy it~"
     echo "==============================================="
 }

@@ -12,7 +12,7 @@
         "listen_port": <port_vmess>,
         "users": [
           {
-            "name": "<proxy_name>",
+            "name": "ray",
             "uuid": "<proxy_uuid>"
           }
         ],
@@ -34,9 +34,8 @@
         "listen_port": <port_reality>,
         "users": [
           {
-            "name": "<proxy_name>",
-            "uuid": "<proxy_uuid>",
-            "flow": "xtls-rprx-vision"
+            "name": "ray",
+            "uuid": "<proxy_uuid>"
           }
         ],
         "tls": {
@@ -45,13 +44,19 @@
           "reality": {
             "enabled": true,
             "handshake": {
-              "server": "<reality_server_name>",
-              "server_port": 443
+              "server_port": 443,
+              "server": "<reality_server_name>"
             },
             "private_key": "<reality_private_key>",
-            "short_id": ""
+            "short_id": [
+              "<reality_short_id>"
+            ]
           }
-        }
+        },
+        "multiplex": {
+          "enabled": true
+        },
+        "transport": {}
       }
     ]
   }
