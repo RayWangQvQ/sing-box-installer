@@ -373,7 +373,7 @@ check_status() {
         err "\nsing-box正在运行"
         status_sbox="2"
     else
-        . ~/.bashrc
+        touch ~/.bashrc && . ~/.bashrc
         if machine_has "sing-box";then
             err "\n已安装sing-box，但未运行"
             status_sbox="1"
