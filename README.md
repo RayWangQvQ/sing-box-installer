@@ -201,6 +201,8 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 ## 5. 感谢
 
-感谢[YxVM](https://yxvm.com/aff.php?aff=668)赞助的服务器用于脚本测试
+感谢[VTEX](https://console.vtexs.com/?affid=1565)赞助的服务器用于脚本测试工作。
 
-![yxvm](https://xn--hwtx4nd78b.zz.ac/static/img/64924c829ec42b3e5a71f6cdc4d91093.image.webp)
+Thanks to [VTEX](https://console.vtexs.com/?affid=1565) for sponsoring the VPS for scripts testing work.
+
+![VTEX](https://console.vtexs.com/templates/2019/dist/images/logo_white.svg)
