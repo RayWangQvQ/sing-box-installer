@@ -201,8 +201,10 @@ bash <(curl -sSL https://raw.githubusercontent.com/RayWangQvQ/sing-box-installer
 
 ## 5. 感谢
 
-感谢[VTEX](https://console.vtexs.com/?affid=1565)赞助的服务器用于脚本测试工作。
+Thanks to [ZMTO](https://console.zmto.com/?affid=1565) for sponsoring the VPS for scripts testing work.
 
-Thanks to [VTEX](https://console.vtexs.com/?affid=1565) for sponsoring the VPS for scripts testing work.
+![ZMTO](https://console.zmto.com/templates/2019/dist/images/logo_white.svg)
 
-![VTEX](https://console.vtexs.com/templates/2019/dist/images/logo_white.svg)
+Thanks to [DartNode](https://dartnode.com/) for sponsoring the VPS for scripts testing work.
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
